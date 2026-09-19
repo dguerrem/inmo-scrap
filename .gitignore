@@ -1,0 +1,19 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Datos generados en runtime
+data_temp.json
+data_temp.json.tmp
+*.xlsx
+
+# Logs
+scraping.log
+scraping.log.*
+
+# Sistema
+.DS_Store

@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recolector de inmobiliarias · Google Maps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-800">
+    <main class="mx-auto max-w-5xl space-y-6 px-4 py-10">
+      <header class="space-y-1">
+        <h1 class="text-2xl font-bold text-slate-900">
+          Recolector de inmobiliarias · Google Maps
+        </h1>
+        <p class="text-sm text-slate-500">
+          Una zona por línea. El servidor buscará «inmobiliarias en &lt;zona&gt;
+          valencia», extraerá los datos y eliminará duplicados antes de generar
+          el Excel.
+        </p>
+      </header>
+
+      <!-- Paso 1: listado de zonas + botón -->
+      <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <label
+          for="zonas"
+          class="mb-2 block text-sm font-semibold text-slate-700"
+        >
+          Zonas a rastrear (una por línea)
+        </label>
+        <textarea
+          id="zonas"
+          rows="16"
+          spellcheck="false"
+          class="w-full rounded-lg border border-slate-300 p-3 font-mono text-sm leading-relaxed focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        >
+Valencia
+Ciutat Vella
+El Carmen
+Ruzafa
+L'Eixample
+Extramurs
+Campanar
+La Saïdia
+El Pla del Real
+L'Olivereta
+Patraix
+Jesús
+Quatre Carreres
+Poblats Marítims
+El Cabanyal
+Camins al Grau
+Avenida del Puerto
+Algirós
+Benimaclet
+Rascanya
+Benicalap
+Benimàmet
+Beniferri
+Poble Nou
+Carpesa
+Castellar-Oliveral
+La Torre
+Forn d'Alcedo
+Pinedo
+El Saler
+Mislata
+Quart de Poblet
+Manises
+Aldaia
+Alaquàs
+Torrent
+Xirivella
+Paiporta
+Picanya
+Sedaví
+Benetússer
+Alfafar
+Massanassa
+Catarroja
+Albal
+Silla
+Picassent
+Burjassot
+Paterna
+Godella
+Rocafort
+Moncada
+Tavernes Blanques
+Almàssera
+Meliana
+Foios
+Albalat dels Sorells
+Museros
+Massamagrell
+Pobla de Farnals
+Rafelbunyol
+El Puig
+Puçol
+Llíria
+Riba-roja de Túria
+L'Eliana
+Loriguilla</textarea
+        >
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <!-- Paso 2: botón con spinner -->
+          <button
+            id="btn-scrape"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span
+              id="spin-icon"
+              class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+            ></span>
+            <span id="btn-scrape-label">Recopilar datos</span>
+          </button>
+
+          <!-- Paso 5: botón verde (oculto hasta que el backend responde 200) -->
+          <a
+            id="btn-download"
+            href="/api/download"
+            class="hidden items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white shadow transition hover:bg-green-700"
+          >
+            ⬇️ Descargar Excel
+          </a>
+
+          <span
+            id="cronometro"
+            class="hidden text-sm font-medium text-blue-700"
+          ></span>
+        </div>
+
+        <p id="estado" class="mt-4 text-sm text-slate-600"></p>
+
+        <details
+          id="panel-errores"
+          class="mt-3 hidden rounded-lg bg-amber-50 p-3 text-sm text-amber-800 ring-1 ring-amber-200"
+        >
+          <summary class="cursor-pointer font-semibold">
+            Zonas con errores
+          </summary>
+          <ul id="lista-errores" class="mt-2 list-disc space-y-1 pl-5"></ul>
+        </details>
+      </section>
+
+      <!-- Consola en directo (traza del scraping, estilo terminal) -->
+      <section
+        id="panel-log"
+        class="hidden overflow-hidden rounded-2xl shadow-lg ring-1 ring-slate-800"
+      >
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 bg-slate-900 px-4 py-2.5"
+        >
+          <div class="flex items-center gap-2.5">
+            <span class="flex gap-1.5">
+              <span class="h-3 w-3 rounded-full bg-red-500/80"></span>
+              <span class="h-3 w-3 rounded-full bg-amber-400/80"></span>
+              <span class="h-3 w-3 rounded-full bg-green-500/80"></span>
+            </span>
+            <h2 class="font-mono text-sm font-semibold text-slate-200">
+              consola · scraping Google Maps
+            </h2>
+            <span
+              id="log-latido"
+              class="hidden h-2 w-2 animate-pulse rounded-full bg-green-400"
+            ></span>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs">
+            <span id="log-contador" class="font-mono text-slate-400"></span>
+            <label
+              class="flex cursor-pointer items-center gap-1.5 font-mono text-slate-400 select-none"
+            >
+              <input
+                id="log-autoscroll"
+                type="checkbox"
+                checked
+                class="h-3 w-3 accent-green-500"
+              />
+              autoscroll
+            </label>
+            <a
+              href="/api/log/descargar"
+              class="font-mono text-sky-400 underline hover:text-sky-300"
+            >
+              descargar
+            </a>
+          </div>
+        </div>
+
+        <div
+          id="log-salida"
+          class="h-96 overflow-auto bg-[#0b1120] px-4 py-3 font-mono text-xs leading-relaxed"
+        >
+          <div class="text-slate-500">
+            Esperando a que se lance una recopilación…
+          </div>
+        </div>
+      </section>
+
+      <!-- Extra: vista previa de lo guardado en data_temp.json -->
+      <section
+        id="panel-preview"
+        class="hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+      >
+        <div class="flex items-baseline justify-between">
+          <h2 class="text-lg font-semibold text-slate-900">Vista previa</h2>
+          <span id="preview-total" class="text-sm text-slate-500"></span>
+        </div>
+        <div
+          class="mt-3 max-h-96 overflow-auto rounded-lg ring-1 ring-slate-200"
+        >
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead
+              class="sticky top-0 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500"
+            >
+              <tr>
+                <th class="px-3 py-2">Nombre</th>
+                <th class="px-3 py-2">Dirección</th>
+                <th class="px-3 py-2">Barrio/Población</th>
+                <th class="px-3 py-2">Teléfono</th>
+                <th class="px-3 py-2">Web</th>
+              </tr>
+            </thead>
+            <tbody
+              id="preview-cuerpo"
+              class="divide-y divide-slate-100"
+            ></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const zonasEl = $("zonas");
+      const btnScrape = $("btn-scrape");
+      const btnLabel = $("btn-scrape-label");
+      const spinIcon = $("spin-icon");
+      const btnDownload = $("btn-download");
+      const cronometro = $("cronometro");
+      const estado = $("estado");
+      const panelErrores = $("panel-errores");
+      const listaErrores = $("lista-errores");
+      const panelPreview = $("panel-preview");
+      const previewTotal = $("preview-total");
+      const previewCuerpo = $("preview-cuerpo");
+      const panelLog = $("panel-log");
+      const logSalida = $("log-salida");
+      const logContador = $("log-contador");
+      const logLatido = $("log-latido");
+      const logAutoscroll = $("log-autoscroll");
+
+      const COLORES_LOG = {
+        info: "text-slate-300",
+        warning: "text-amber-300",
+        error: "text-red-400",
+      };
+      const MAX_LINEAS_DOM = 4000; // el DOM no puede crecer sin límite en ejecuciones de horas
+
+      let timer = null;
+      let logDesde = 0;
+      let logTimer = null;
+      let lineasLog = 0;
+      let logPidiendo = false;
+      let adjunto = false; // true = estamos mirando una ejecución ya en marcha
+
+      /* ---------------------------- consola en directo ---------------------------- */
+
+      function pintarEntradas(entradas) {
+        let terminado = false;
+        entradas.forEach((e) => {
+          const linea = document.createElement("div");
+          linea.className = COLORES_LOG[e.nivel] || COLORES_LOG.info;
+          linea.textContent = `${e.hora}  ${e.texto}`;
+          logSalida.appendChild(linea);
+          lineasLog += 1;
+          if (e.texto.includes("═══ Terminado")) terminado = true;
+        });
+        logContador.textContent = lineasLog ? `${lineasLog} líneas` : "";
+
+        while (logSalida.childElementCount > MAX_LINEAS_DOM) {
+          logSalida.removeChild(logSalida.firstElementChild);
+        }
+        if (logAutoscroll.checked) {
+          logSalida.scrollTop = logSalida.scrollHeight;
+        }
+        if (terminado) finalizarAdjunto();
+      }
+
+      async function refrescarLog() {
+        // Sin este candado, dos peticiones solapadas releen el mismo tramo y lo
+        // pintan por duplicado.
+        if (logPidiendo) return;
+        logPidiendo = true;
+        try {
+          const res = await fetch(`/api/log?desde=${logDesde}`, {
+            cache: "no-store",
+          });
+          if (res.ok) {
+            const { entradas, ultimo } = await res.json();
+            if (entradas.length) {
+              logDesde = ultimo;
+              pintarEntradas(entradas);
+            }
+          }
+          // Red de seguridad: en pestañas en segundo plano el navegador
+          // estrangula los temporizadores, así que podemos perdernos la línea
+          // final. Preguntamos directamente si la ejecución sigue viva.
+          if (adjunto) {
+            const r = await fetch("/api/estado", { cache: "no-store" });
+            if (r.ok && !(await r.json()).en_curso) finalizarAdjunto();
+          }
+        } catch (_) {
+          /* la consola es best-effort: nunca debe romper el flujo principal */
+        } finally {
+          logPidiendo = false;
+        }
+      }
+
+      function abrirConsola() {
+        logSalida.innerHTML = "";
+        lineasLog = 0;
+        logContador.textContent = "";
+        panelLog.classList.remove("hidden");
+        if (logTimer) clearInterval(logTimer);
+        logTimer = setInterval(refrescarLog, 1000);
+      }
+
+      async function arrancarLog() {
+        logLatido.classList.remove("hidden");
+        abrirConsola();
+        // Saltamos al final del buffer ANTES de lanzar el scraping: así no
+        // pintamos restos de la ejecución anterior, y como el servidor nunca
+        // reinicia la numeración, no perdemos ni una línea de esta.
+        try {
+          const res = await fetch("/api/log?desde=0", { cache: "no-store" });
+          if (res.ok) logDesde = (await res.json()).ultimo || 0;
+        } catch (_) {
+          logDesde = 0;
+        }
+      }
+
+      /** Engancharse a una ejecución ya en marcha (o al recargar la página). */
+      async function adjuntarLog() {
+        adjunto = true;
+        logDesde = 0;
+        logLatido.classList.remove("hidden");
+        abrirConsola();
+        await refrescarLog();
+        // Si el buffer ya contiene el final, refrescarLog() habrá llamado a
+        // finalizarAdjunto(); si no, seguimos sondeando hasta que termine.
+      }
+
+      function finalizarAdjunto() {
+        if (!adjunto) return;
+        adjunto = false;
+        if (logTimer) clearInterval(logTimer);
+        logTimer = null;
+        logLatido.classList.add("hidden");
+        btnScrape.disabled = false;
+        zonasEl.disabled = false;
+        btnLabel.textContent = "Recopilar datos";
+        spinIcon.classList.add("hidden");
+        btnDownload.classList.remove("hidden");
+        btnDownload.classList.add("inline-flex");
+        estado.textContent =
+          "✅ La recopilación ha terminado. Ya puedes descargar el Excel.";
+        cargarPreview();
+      }
+
+      async function pararLog() {
+        if (logTimer) clearInterval(logTimer);
+        logTimer = null;
+        logLatido.classList.add("hidden");
+        // Espera a la petición en vuelo para no perder el tramo final.
+        while (logPidiendo) await new Promise((r) => setTimeout(r, 120));
+        await refrescarLog();
+      }
+
+      /* ------------------------------- cronómetro -------------------------------- */
+
+      function arrancarCronometro() {
+        const inicio = Date.now();
+        cronometro.classList.remove("hidden");
+        cronometro.textContent = "0 s";
+        timer = setInterval(() => {
+          const s = Math.floor((Date.now() - inicio) / 1000);
+          cronometro.textContent =
+            s < 60
+              ? `${s} s`
+              : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
+        }, 1000);
+      }
+
+      function pararCronometro() {
+        if (timer) clearInterval(timer);
+        timer = null;
+        cronometro.classList.add("hidden");
+      }
+
+      function mostrarErrores(errores) {
+        listaErrores.innerHTML = "";
+        if (!errores || !errores.length) {
+          panelErrores.open = false;
+          panelErrores.classList.add("hidden");
+          return;
+        }
+        errores.forEach(({ zona, error }) => {
+          const li = document.createElement("li");
+          li.textContent = `${zona}: ${error}`;
+          listaErrores.appendChild(li);
+        });
+        panelErrores.classList.remove("hidden");
+      }
+
+      async function cargarPreview() {
+        try {
+          const res = await fetch("/api/data");
+          if (!res.ok) return;
+          const { total, items } = await res.json();
+          previewTotal.textContent = `${total} filas`;
+          previewCuerpo.innerHTML = "";
+          items.slice(0, 500).forEach((item) => {
+            const tr = document.createElement("tr");
+            [
+              item.nombre,
+              item.direccion,
+              item.barrio,
+              item.telefono,
+              item.web,
+            ].forEach((valor, i) => {
+              const td = document.createElement("td");
+              td.className =
+                "max-w-xs truncate px-3 py-2 align-top " +
+                (i === 0 ? "font-medium text-slate-900" : "text-slate-600");
+              td.textContent = valor || "—";
+              td.title = valor || "";
+              tr.appendChild(td);
+            });
+            previewCuerpo.appendChild(tr);
+          });
+          panelPreview.classList.remove("hidden");
+        } catch (_) {
+          /* la vista previa es opcional */
+        }
+      }
+
+      btnScrape.addEventListener("click", async () => {
+        const zonas = zonasEl.value
+          .split("\n")
+          .map((z) => z.trim())
+          .filter(Boolean);
+        if (!zonas.length) {
+          estado.textContent = "⚠️ Añade al menos una zona.";
+          return;
+        }
+
+        btnScrape.disabled = true;
+        zonasEl.disabled = true;
+        btnLabel.textContent = "Scrapeando…";
+        spinIcon.classList.remove("hidden");
+        btnDownload.classList.add("hidden");
+        btnDownload.classList.remove("inline-flex");
+        panelPreview.classList.add("hidden");
+        mostrarErrores([]);
+        estado.textContent = `Lanzando ${zonas.length} búsquedas en Google Maps… esto puede tardar.`;
+        arrancarCronometro();
+        await arrancarLog();
+
+        try {
+          const res = await fetch("/api/scrape", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ zonas }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const error = new Error(data.detail || `Error ${res.status}`);
+            error.status = res.status;
+            throw error;
+          }
+
+          estado.textContent =
+            `✅ ${data.unicos} inmobiliarias únicas · ${data.resultados} resultados brutos · ` +
+            `${data.duplicados} duplicados eliminados · ${data.zonas} zonas · ${data.segundos} s`;
+          btnDownload.classList.remove("hidden");
+          btnDownload.classList.add("inline-flex");
+          mostrarErrores(data.errores);
+          await cargarPreview();
+        } catch (err) {
+          estado.textContent = `❌ ${err.message}`;
+          // Ya había un scraping en marcha: en lugar de dejarte a ciegas,
+          // te enganchamos a su traza en directo.
+          if (err.status === 409) await adjuntarLog();
+        } finally {
+          btnScrape.disabled = false;
+          zonasEl.disabled = false;
+          btnLabel.textContent = "Recopilar datos";
+          spinIcon.classList.add("hidden");
+          pararCronometro();
+          // Si nos hemos enganchado a una ejecución ajena (409), la consola debe
+          // seguir sondeando: pararLog() la dejaría congelada.
+          if (!adjunto) await pararLog();
+        }
+      });
+
+      /* ------------------------------------------------------------------------- */
+      /* Al volver a la pestaña, refrescamos de inmediato: el navegador estrangula  */
+      /* los temporizadores mientras está en segundo plano.                        */
+      /* ------------------------------------------------------------------------- */
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && (logTimer || adjunto)) {
+          refrescarLog();
+        }
+      });
+
+      /* ------------------------------------------------------------------------- */
+      /* Al abrir la página: si ya hay una recopilación en marcha (por ejemplo tras */
+      /* recargar durante una ejecución de horas), engancharse a su traza.          */
+      /* ------------------------------------------------------------------------- */
+      (async () => {
+        try {
+          const res = await fetch("/api/estado", { cache: "no-store" });
+          if (!res.ok) return;
+          if (!(await res.json()).en_curso) return;
+
+          btnScrape.disabled = true;
+          zonasEl.disabled = true;
+          btnLabel.textContent = "Scrapeando…";
+          spinIcon.classList.remove("hidden");
+          estado.textContent =
+            "ℹ️ Hay una recopilación en curso: mostrando su traza en directo.";
+          await adjuntarLog();
+        } catch (_) {
+          /* el estado es best-effort */
+        }
+      })();
+    </script>
+  </body>
+</html>
