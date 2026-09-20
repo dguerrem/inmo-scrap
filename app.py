@@ -33,9 +33,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
 
-import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
+from openpyxl import Workbook
+from openpyxl.formatting.rule import DataBarRule
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 from pydantic import BaseModel, Field
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
@@ -146,6 +149,84 @@ def _configurar_log() -> logging.Logger:
 
 log = _configurar_log()
 
+# --------------------------------------------------------------------------- #
+# Progreso (barra del frontend). Se actualiza mientras el scraping avanza.
+# --------------------------------------------------------------------------- #
+_progreso: dict[str, Any] = {
+    "activo": False,
+    "total_zonas": 0,
+    "zona_actual": 0,
+    "zona_nombre": "",
+    "fichas_hechas": 0,
+    "fichas_totales": 0,
+    "acumuladas": 0,
+    "segundos": 0.0,
+}
+_lock_progreso = threading.Lock()
+_inicio_ejecucion = 0.0
+
+
+def _reiniciar_progreso(total_zonas: int) -> None:
+    global _inicio_ejecucion
+    with _lock_progreso:
+        _progreso.update(
+            activo=True,
+            total_zonas=total_zonas,
+            zona_actual=0,
+            zona_nombre="",
+            fichas_hechas=0,
+            fichas_totales=0,
+            acumuladas=0,
+            segundos=0.0,
+        )
+        _inicio_ejecucion = time.perf_counter()
+
+
+def _actualizar_progreso(**campos: Any) -> None:
+    with _lock_progreso:
+        _progreso.update(campos)
+
+
+def _cerrar_progreso() -> None:
+    """Marca la ejecución como terminada incluso si algo falló a mitad."""
+    with _lock_progreso:
+        _progreso["activo"] = False
+        _progreso["zona_nombre"] = ""
+        _progreso["segundos"] = round(time.perf_counter() - _inicio_ejecucion, 1)
+
+
+def _instantanea_progreso() -> dict[str, Any]:
+    """Progreso + porcentaje y estimación de tiempo restante."""
+    with _lock_progreso:
+        datos = dict(_progreso)
+
+    if datos["activo"]:
+        datos["segundos"] = round(time.perf_counter() - _inicio_ejecucion, 1)
+
+    total = datos["total_zonas"]
+    if not total:
+        datos.update(porcentaje=0.0, zonas_restantes=0, eta_segundos=None)
+        return datos
+
+    # Media zona de crédito por cada zona ya terminada, más la fracción de la actual.
+    completadas = max(datos["zona_actual"] - 1, 0)
+    fraccion = 0.0
+    if datos["fichas_totales"]:
+        fraccion = min(datos["fichas_hechas"] / datos["fichas_totales"], 1.0)
+
+    datos["porcentaje"] = round(min((completadas + fraccion) / total * 100, 100), 1)
+    # Al terminar, no queda nada pendiente aunque zona_actual apunte a la última.
+    datos["zonas_restantes"] = 0 if not datos["activo"] else max(total - completadas, 0)
+
+    # ETA extrapolando el ritmo real por zona (más honesto que usar el porcentaje,
+    # porque las zonas tienen tamaños muy dispares).
+    if completadas and datos["activo"]:
+        datos["eta_segundos"] = round(datos["segundos"] / completadas * datos["zonas_restantes"])
+    else:
+        datos["eta_segundos"] = None
+    return datos
+
+
 app = FastAPI(title="Scraper Inmobiliarias · Google Maps")
 _candado = threading.Lock()   # evita que dos scrapings se pisen
 
@@ -179,6 +260,7 @@ def scrape(peticion: ScrapeRequest) -> dict[str, Any]:
         inicio = time.time()
         with _lock_log:
             _registro.clear()
+        _reiniciar_progreso(len(zonas))
         log.info("═══ Nueva recopilación · %d zonas ═══", len(zonas))
 
         registros, errores = _scrape_zonas(zonas)
@@ -210,6 +292,7 @@ def scrape(peticion: ScrapeRequest) -> dict[str, Any]:
         log.error("Recopilación abortada · %s", mensaje)
         raise HTTPException(status_code=500, detail=mensaje) from exc
     finally:
+        _cerrar_progreso()
         _candado.release()
 
 
@@ -234,6 +317,12 @@ def descargar_log() -> FileResponse:
 def api_estado() -> dict[str, Any]:
     """Si hay una recopilación en curso, el frontend se engancha a su log."""
     return {"en_curso": _candado.locked()}
+
+
+@app.get("/api/progreso")
+def api_progreso() -> dict[str, Any]:
+    """Progreso de la recopilación en curso, para la barra del frontend."""
+    return _instantanea_progreso()
 
 
 @app.get("/api/data")
@@ -312,6 +401,12 @@ def _scrape_zonas(zonas: list[str]) -> tuple[list[dict[str, str]], list[dict[str
                     pagina.set_default_timeout(30_000)
 
                 log.info("[%d/%d] «%s» · buscando…", indice, total, zona)
+                _actualizar_progreso(
+                    zona_actual=indice,
+                    zona_nombre=zona,
+                    fichas_hechas=0,
+                    fichas_totales=0,
+                )
                 t_zona = time.perf_counter()
                 try:
                     items = _scrape_zona(pagina, zona)
@@ -319,6 +414,7 @@ def _scrape_zonas(zonas: list[str]) -> tuple[list[dict[str, str]], list[dict[str
                     # Salvaguarda: si el proceso muere en la zona 60, las anteriores ya están a salvo
                     unicos = deduplicar(registros)
                     _guardar_datos(unicos)
+                    _actualizar_progreso(acumuladas=len(unicos))
                     log.info(
                         "[%d/%d] «%s» · %d inmobiliarias en %.1f s · %d únicas acumuladas",
                         indice,
@@ -363,6 +459,7 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     if "/maps/place/" in pagina.url:
         item = _extraer_ficha(pagina)
         item["barrio"] = zona
+        _actualizar_progreso(fichas_hechas=1, fichas_totales=1)
         log.info("      un único resultado: redirigido directamente a la ficha")
         return [item] if item["nombre"] else []
 
@@ -377,6 +474,7 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     t = time.perf_counter()
     enlaces = _recolectar_enlaces(pagina)
     total_fichas = len(enlaces)
+    _actualizar_progreso(fichas_hechas=0, fichas_totales=total_fichas)
     log.info(
         "      %d resultados tras %.1f s de scroll · extrayendo fichas…",
         total_fichas,
@@ -411,6 +509,7 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
             problema = f"{type(exc).__name__}: {exc}"
 
         items.append(item)
+        _actualizar_progreso(fichas_hechas=posicion)
         log.info(
             "      %3d/%d · %5.1f s · %s · tel %s · web %s%s",
             posicion,
@@ -642,29 +741,258 @@ def _leer_datos() -> list[dict[str, str]]:
 
 
 # --------------------------------------------------------------------------- #
-# Excel
+# Excel: formato cuidado, hoja de resumen + una hoja por barrio/población
 # --------------------------------------------------------------------------- #
+AZUL = "1F3B63"           # cabeceras y título
+AZUL_BANDA = "F2F7FC"     # filas alternas
+AZUL_CLARO = "E4EDF7"     # subtotales
+GRIS_BORDE = "C9D6E4"
+GRIS_TEXTO = "5F7284"
+AZUL_ENLACE = "0B5FA5"
+AZUL_DATO = "1F3B63"
+
+BORDE_FINO = Side(style="thin", color=GRIS_BORDE)
+BORDE_CELDA = Border(left=BORDE_FINO, right=BORDE_FINO, top=BORDE_FINO, bottom=BORDE_FINO)
+
+ANCHOS_COLUMNA = (42, 56, 26, 17, 48)   # una por columna de COLUMNAS
+CARACTERES_INVALIDOS_HOJA = re.compile(r"[:\\/?*\[\]]")
+
+
 def _excel_en_memoria(items: list[dict[str, str]]) -> io.BytesIO:
-    filas = [
-        {titulo: str(item.get(clave) or "") for clave, titulo in COLUMNAS}
-        for item in items
-    ]
-    # dtype=str: evita que pandas convierta los teléfonos en números (644130714.0).
-    dataframe = pd.DataFrame(
-        filas, columns=[titulo for _, titulo in COLUMNAS], dtype=str
-    )
-    dataframe = dataframe.fillna("")
+    """Libro con una hoja resumen + una hoja por barrio/población, todo formateado."""
+    libro = Workbook()
+    libro.remove(libro.active)  # sin la hoja "Sheet" vacía por defecto
+
+    reservados = {"resumen"}
+    _hoja_resumen(libro, items)
+    for zona, filas in _agrupar_por_zona(items):
+        _hoja_zona(libro, _nombre_hoja(zona, reservados), filas)
 
     buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        dataframe.to_excel(writer, index=False, sheet_name="Inmobiliarias")
-        hoja = writer.sheets["Inmobiliarias"]
-        for columna, ancho in {"A": 42, "B": 52, "C": 22, "D": 18, "E": 48}.items():
-            hoja.column_dimensions[columna].width = ancho
-        hoja.freeze_panes = "A2"
-
+    libro.save(buffer)
     buffer.seek(0)
     return buffer
+
+
+def _agrupar_por_zona(items: list[dict[str, str]]) -> list[tuple[str, list[dict[str, str]]]]:
+    """Agrupa por barrio/población y ordena alfabéticamente (sin acentos)."""
+    grupos: dict[str, list[dict[str, str]]] = {}
+    for item in items:
+        grupos.setdefault((item.get("barrio") or "Sin zona").strip(), []).append(item)
+    return sorted(grupos.items(), key=lambda par: _normalizar_nombre(par[0]))
+
+
+def _nombre_hoja(zona: str, reservados: set[str]) -> str:
+    """
+    Excel limita los nombres de hoja a 31 caracteres, sin : \\ / ? * [ ] y únicos.
+    'Riba-roja de Túria' pasa tal cual; otros se sanean.
+    """
+    nombre = CARACTERES_INVALIDOS_HOJA.sub("-", (zona or "").strip()).strip("'")
+    nombre = (nombre or "Sin zona")[:31]
+    base = nombre
+    sufijo = 2
+    while nombre.casefold() in reservados:
+        marca = f" ({sufijo})"
+        nombre = base[: 31 - len(marca)] + marca
+        sufijo += 1
+    reservados.add(nombre.casefold())
+    return nombre
+
+
+def _hoja_resumen(libro: Workbook, items: list[dict[str, str]]) -> None:
+    """Portada con totales y desglose por zona, listo para segmentar de un vistazo."""
+    hoja = libro.create_sheet("Resumen", 0)
+    grupos = _agrupar_por_zona(items)
+    total = len(items)
+    con_tel = sum(1 for item in items if item.get("telefono"))
+    con_web = sum(1 for item in items if item.get("web"))
+    con_contacto = sum(1 for item in items if item.get("telefono") or item.get("web"))
+    ultima_columna = get_column_letter(len(COLUMNAS))
+
+    # --- Título ---
+    hoja.merge_cells(f"A1:{ultima_columna}1")
+    titulo = hoja["A1"]
+    titulo.value = "Inmobiliarias · Google Maps · Valencia y área metropolitana"
+    titulo.fill = PatternFill("solid", fgColor=AZUL)
+    titulo.font = Font(bold=True, size=14, color="FFFFFF")
+    titulo.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    hoja.row_dimensions[1].height = 38
+
+    hoja.merge_cells(f"A2:{ultima_columna}2")
+    subtitulo = hoja["A2"]
+    subtitulo.value = (
+        f"Generado el {datetime.now():%d/%m/%Y a las %H:%M} · "
+        f"{total} inmobiliarias únicas en {len(grupos)} zonas"
+    )
+    subtitulo.font = Font(size=10, italic=True, color=GRIS_TEXTO)
+    subtitulo.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    hoja.row_dimensions[2].height = 22
+
+    # --- Indicadores generales ---
+    fila = 4
+    for columna, titulo in enumerate(("Métrica", "Total", "% del total"), start=1):
+        encabezado = hoja.cell(row=fila, column=columna, value=titulo)
+        encabezado.font = Font(bold=True, size=10, color=AZUL_DATO)
+        encabezado.fill = PatternFill("solid", fgColor=AZUL_CLARO)
+        encabezado.border = BORDE_CELDA
+        encabezado.alignment = Alignment(
+            horizontal="left" if columna == 1 else "center",
+            vertical="center",
+            indent=1 if columna == 1 else 0,
+        )
+    hoja.row_dimensions[fila].height = 20
+
+    indicadores = (
+        ("Inmobiliarias únicas", total, "0"),
+        ("Con teléfono", con_tel, "0"),
+        ("Con web", con_web, "0"),
+        ("Con teléfono o web", con_contacto, "0"),
+    )
+    fila = 5
+    for etiqueta, valor, formato in indicadores:
+        celda_etiqueta = hoja.cell(row=fila, column=1, value=etiqueta)
+        celda_etiqueta.font = Font(bold=True, size=10, color=AZUL_DATO)
+        celda_etiqueta.fill = PatternFill("solid", fgColor=AZUL_CLARO)
+        celda_etiqueta.border = BORDE_CELDA
+        celda_etiqueta.alignment = Alignment(vertical="center", indent=1)
+
+        celda_valor = hoja.cell(row=fila, column=2, value=valor)
+        celda_valor.number_format = formato
+        celda_valor.font = Font(bold=True, size=11, color=AZUL_DATO)
+        celda_valor.alignment = Alignment(horizontal="center", vertical="center")
+        celda_valor.border = BORDE_CELDA
+
+        porcentaje = (valor / total) if total else 0
+        celda_pct = hoja.cell(row=fila, column=3, value=porcentaje)
+        celda_pct.number_format = "0.0%"
+        celda_pct.font = Font(size=10, color=GRIS_TEXTO)
+        celda_pct.alignment = Alignment(horizontal="center", vertical="center")
+        celda_pct.border = BORDE_CELDA
+        hoja.row_dimensions[fila].height = 19
+        fila += 1
+
+    # --- Desglose por zona ---
+    fila += 1
+    hoja.cell(row=fila, column=1, value="Desglose por barrio / población").font = Font(
+        bold=True, size=11, color=AZUL_DATO
+    )
+    fila += 1
+
+    cabeceras = ("Barrio / Población", "Inmobiliarias", "Con teléfono", "Con web", "% con contacto")
+    _pintar_cabecera(hoja, fila, cabeceras)
+    primera_fila_datos = fila + 1
+
+    for indice, (zona, filas_zona) in enumerate(grupos):
+        fila += 1
+        tamano = len(filas_zona)
+        tel_zona = sum(1 for item in filas_zona if item.get("telefono"))
+        web_zona = sum(1 for item in filas_zona if item.get("web"))
+        contacto = sum(
+            1 for item in filas_zona if item.get("telefono") or item.get("web")
+        )
+
+        valores = (
+            zona,
+            tamano,
+            tel_zona,
+            web_zona,
+            (contacto / tamano) if tamano else 0,
+        )
+        for columna, valor in enumerate(valores, start=1):
+            celda = hoja.cell(row=fila, column=columna, value=valor)
+            celda.border = BORDE_CELDA
+            celda.font = Font(size=10)
+            if indice % 2:
+                celda.fill = PatternFill("solid", fgColor=AZUL_BANDA)
+            if columna == 1:
+                celda.alignment = Alignment(vertical="center", indent=1)
+                celda.font = Font(size=10, bold=True, color=AZUL_DATO)
+            else:
+                celda.alignment = Alignment(horizontal="center", vertical="center")
+            celda.number_format = "0.0%" if columna == 5 else "0"
+        hoja.row_dimensions[fila].height = 18
+
+    # Fila de totales
+    fila += 1
+    totales = ("TOTAL", total, con_tel, con_web, (con_contacto / total) if total else 0)
+    for columna, valor in enumerate(totales, start=1):
+        celda = hoja.cell(row=fila, column=columna, value=valor)
+        celda.fill = PatternFill("solid", fgColor=AZUL_CLARO)
+        celda.font = Font(bold=True, size=10, color=AZUL_DATO)
+        celda.border = Border(
+            left=BORDE_FINO, right=BORDE_FINO, bottom=BORDE_FINO, top=Side(style="medium", color=AZUL)
+        )
+        celda.number_format = "0.0%" if columna == 5 else "0"
+        celda.alignment = (
+            Alignment(vertical="center", indent=1)
+            if columna == 1
+            else Alignment(horizontal="center", vertical="center")
+        )
+    hoja.row_dimensions[fila].height = 20
+
+    # Barra de datos en la columna de volumen: se ve el peso de cada zona de un vistazo
+    hoja.conditional_formatting.add(
+        f"B{primera_fila_datos}:B{fila - 1}",
+        DataBarRule(start_type="num", start_value=0, end_type="max", color="5B9BD5"),
+    )
+
+    for columna, ancho in enumerate((34, 15, 14, 12, 15), start=1):
+        hoja.column_dimensions[get_column_letter(columna)].width = ancho
+    hoja.sheet_view.showGridLines = False
+
+
+def _pintar_cabecera(hoja, fila: int, titulos: tuple[str, ...]) -> None:
+    for columna, titulo in enumerate(titulos, start=1):
+        celda = hoja.cell(row=fila, column=columna, value=titulo)
+        celda.fill = PatternFill("solid", fgColor=AZUL)
+        celda.font = Font(bold=True, size=10, color="FFFFFF")
+        celda.alignment = Alignment(
+            horizontal="left" if columna == 1 else "center",
+            vertical="center",
+            indent=1 if columna == 1 else 0,
+        )
+        celda.border = BORDE_CELDA
+    hoja.row_dimensions[fila].height = 24
+
+
+def _hoja_zona(libro: Workbook, nombre: str, filas: list[dict[str, str]]) -> None:
+    """Una hoja por barrio, con cabecera coloreada, filas alternas y web clicable."""
+    hoja = libro.create_sheet(nombre)
+
+    _pintar_cabecera(hoja, 1, tuple(titulo for _, titulo in COLUMNAS))
+
+    for indice, item in enumerate(filas):
+        fila = indice + 2
+        banda = PatternFill("solid", fgColor=AZUL_BANDA) if indice % 2 else None
+
+        for columna, (clave, _) in enumerate(COLUMNAS, start=1):
+            celda = hoja.cell(row=fila, column=columna, value=str(item.get(clave) or ""))
+            celda.border = BORDE_CELDA
+            celda.font = Font(size=10)
+            celda.alignment = Alignment(vertical="center", indent=1)
+            if banda:
+                celda.fill = banda
+
+        # Nombre destacado y teléfono centrado
+        hoja.cell(row=fila, column=1).font = Font(size=10, bold=True, color=AZUL_DATO)
+        hoja.cell(row=fila, column=4).alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
+
+        # Web como enlace real
+        celda_web = hoja.cell(row=fila, column=5)
+        if celda_web.value:
+            celda_web.hyperlink = celda_web.value
+            celda_web.font = Font(size=10, color=AZUL_ENLACE, underline="single")
+
+        hoja.row_dimensions[fila].height = 18
+
+    for columna, ancho in enumerate(ANCHOS_COLUMNA, start=1):
+        hoja.column_dimensions[get_column_letter(columna)].width = ancho
+
+    hoja.freeze_panes = "A2"
+    hoja.auto_filter.ref = f"A1:{get_column_letter(len(COLUMNAS))}{len(filas) + 1}"
+    hoja.sheet_view.showGridLines = False
 
 
 if __name__ == "__main__":

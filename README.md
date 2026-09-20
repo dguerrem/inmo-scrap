@@ -21,6 +21,10 @@ Luego abre en el navegador: **<http://127.0.0.1:8000>**
 
 > Si el comando falla porque `.venv` no existe o está roto, salta a
 > [Reinstalar desde cero](#-reinstalar-desde-cero).
+>
+> Si sale un error tipo `[Errno 48] Address already in use`, **ya hay un servidor
+> arrancado** en ese puerto (quizá en otra terminal o pestaña olvidada). Para
+> liberarlo: `pkill -f "uvicorn app:app"` y vuelve a lanzarlo.
 
 ## Paso 1 · Elegir zonas
 
@@ -64,7 +68,24 @@ Es un terminal en vivo. Cada línea es un paso del bot:
 > Al volver a entrar, la web detecta la ejecución en marcha y se reengancha sola a
 > la consola.
 
-## Paso 4 · Descargar el Excel
+## Paso 4 · Seguir la barra de progreso
+
+Bajo el botón aparece una **barra de progreso** con:
+
+| Elemento                        | Qué te dice                                         |
+| ------------------------------- | --------------------------------------------------- |
+| `Zona 12/67 · «Patraix»`        | Por dónde va y cuántas zonas tiene en total.        |
+| `38 %`                          | Porcentaje global (zonas terminadas + la actual).   |
+| `Fichas de esta zona: 37/48`    | Inmobiliarias procesadas dentro de la zona actual.  |
+| `24 únicas acumuladas`          | Lo que lleva deduplicado (se actualiza al cerrar cada zona). |
+| `Quedan ~12 min 30 s`           | Estimación según el ritmo real que lleva.           |
+
+> El tiempo restante es una **estimación**: se calcula con la media de las zonas ya
+> terminadas. Al principio puede bailar bastante (las zonas tienen tamaños muy
+> dispares) y se va afinando según avanza. Si aún no ha terminado ninguna zona
+> muestra solo el tiempo transcurrido.
+
+## Paso 5 · Descargar el Excel
 
 Cuando termina aparece el botón verde **「⬇️ Descargar Excel」** y el mensaje
 `✅ La recopilación ha terminado`.
@@ -74,7 +95,28 @@ Cuando termina aparece el botón verde **「⬇️ Descargar Excel」** y el men
   todo tiene sentido antes de descargar.
 - El archivo se llama `inmobiliarias_valencia_AAAAMMDD_HHMM.xlsx`.
 
-## Paso 5 · Parar el servidor
+### Cómo viene el Excel
+
+Trae **una pestaña de resumen + una pestaña por cada barrio/población**:
+
+- **`Resumen`** (primera pestaña): totales generales (cuántas tienen teléfono, web,
+  porcentajes), y una tabla con el desglose zona a zona. La columna de volumen lleva
+  una **barra de datos azul** para ver de un vistazo qué zonas concentran más
+  inmobiliarias. La última fila es el `TOTAL`.
+- **Una pestaña por zona** (ordenadas alfabéticamente), con:
+  - Cabecera azul marino con texto blanco y **filas alternas** en azul muy claro.
+  - Fila de cabecera **congelada** y **autofiltro** activado: puedes filtrar y
+    ordenar sin perder de vista los títulos.
+  - **Web como enlace clicable** (azul subrayado).
+  - Teléfono centrado y en **formato texto** (evita que Excel se coma el `0`
+    inicial o lo convierta en notación científica).
+  - Anchos de columna ya ajustados y sin líneas de cuadrícula.
+
+Nombres de zona como `Riba-roja de Túria` o `L'Eixample` dan pestañas válidas; si
+una zona tuviera caracteres prohibidos por Excel (`: \ / ? * [ ]`) o superase los
+31 caracteres, se sanea automáticamente.
+
+## Paso 6 · Parar el servidor
 
 En la terminal donde lo lanzaste: `Ctrl + C`.
 
@@ -82,17 +124,17 @@ En la terminal donde lo lanzaste: `Ctrl + C`.
 
 ## ⏱️ ¿Cuánto va a tardar?
 
-Cada inmobiliaria es **una visita a su ficha**, y eso cuesta ~2 s. Tiempos medidos:
+Cada inmobiliaria es **una visita a su ficha**, y eso cuesta ~2-3 s. Tiempos medidos:
 
 | Zona      | Resultados | Tiempo |
 | --------- | ---------- | ------ |
 | Carpesa   | 5          | 12 s   |
 | Pinedo    | 7          | 31 s   |
 | El Saler  | 5          | 18 s   |
-| El Palmar | 18         | 58 s   |
+| El Palmar | 10         | 38 s   |
 
-**Cálculo rápido:** ~**2,5 s por inmobiliaria**. Una zona céntrica tipo Ruzafa o
-El Carmen puede devolver 100-150 resultados → **4-6 minutos cada una**.
+**Cálculo rápido:** ~**2,5-3 s por inmobiliaria**. Una zona céntrica tipo Ruzafa o
+El Carmen puede devolver 100-150 resultados → **4-7 minutos cada una**.
 
 > ⚠️ **Ojo con lanzar las 67 zonas de golpe.** Los barrios céntricos se solapan mucho
 > y el total puede irse a **varias horas**. Estrategia recomendada: ir por bloques
@@ -102,6 +144,12 @@ El Carmen puede devolver 100-150 resultados → **4-6 minutos cada una**.
 > **Cada ejecución sobrescribe `data_temp.json`.** Si descargas solo al final de todo,
 > el Excel tendrá todo. Si vas por bloques, descarga cada bloque antes de lanzar el
 > siguiente o perderás los anteriores.
+
+> ℹ️ **Calidad del dato:** Google no siempre respeta la coletilla "valencia" de la
+> búsqueda. En el término `El Palmar` devolvió también inmobiliarias de El Palmar de
+> Murcia (teléfonos con prefijo 968/868). Revisa la dirección de las filas raras:
+> la columna `Dirección` incluye la provincia, así que un filtro por "Valencia" la
+> limpia rápido.
 
 ---
 
@@ -115,6 +163,8 @@ El Carmen puede devolver 100-150 resultados → **4-6 minutos cada una**.
 | Muchas líneas `FALLO: TimeoutError`         | Google va lento o te está limitando. Reduce las zonas por bloque.          |
 | Quiero menos ruido en la consola            | Sube `CICLOS_SIN_NOVEDAD` en `app.py`, o simplemente ignóralo.             |
 | El Excel tiene menos filas de las previstas | Es correcto: los duplicados entre zonas colindantes se eliminan.           |
+| El tiempo restante baila mucho              | Normal en las primeras zonas. Se afina según van cerrando zonas.           |
+| `[Errno 48] Address already in use`         | Ya hay un servidor en el puerto. `pkill -f "uvicorn app:app"` y reintenta.  |
 
 ---
 
@@ -128,24 +178,26 @@ El Carmen puede devolver 100-150 resultados → **4-6 minutos cada una**.
    mismas inmobiliarias).
 4. Guarda en `data_temp.json` **al terminar cada zona**: si algo falla a mitad, no
    pierdes lo anterior.
-5. `GET /api/download` genera el `.xlsx` en memoria y lo descarga.
+5. `GET /api/download` agrupa por barrio y genera el `.xlsx` en memoria (una pestaña
+   por zona + `Resumen`) y lo descarga.
 
 - **Backend:** FastAPI, todo en `app.py`.
 - **Frontend:** `templates/index.html` (Tailwind por CDN + Vanilla JS, cero frameworks).
 - **Scraping:** Playwright (Chromium headless).
-- **Exportación:** Pandas + OpenPyXL.
+- **Exportación:** OpenPyXL (generación y formato directo, sin pandas).
 
 ### Endpoints
 
-| Método | Ruta                 | Descripción                                              |
-| ------ | -------------------- | -------------------------------------------------------- |
-| GET    | `/`                  | Interfaz web.                                            |
-| POST   | `/api/scrape`        | Recorre las zonas, deduplica y guarda el JSON.           |
-| GET    | `/api/download`      | Devuelve el Excel.                                       |
-| GET    | `/api/data`          | Datos guardados, para la vista previa.                   |
-| GET    | `/api/log?desde=N`   | Líneas de log nuevas desde el índice N.                  |
-| GET    | `/api/log/descargar` | Log completo en `.txt` (incluye ejecuciones anteriores). |
-| GET    | `/api/estado`        | Si hay una recopilación en curso.                        |
+| Método | Ruta                 | Descripción                                                    |
+| ------ | -------------------- | -------------------------------------------------------------- |
+| GET    | `/`                  | Interfaz web.                                                  |
+| POST   | `/api/scrape`        | Recorre las zonas, deduplica y guarda el JSON.                 |
+| GET    | `/api/download`      | Devuelve el Excel (Resumen + una hoja por barrio).             |
+| GET    | `/api/data`          | Datos guardados, para la vista previa.                         |
+| GET    | `/api/log?desde=N`   | Líneas de log nuevas desde el índice N.                        |
+| GET    | `/api/log/descargar` | Log completo en `.txt` (incluye ejecuciones anteriores).       |
+| GET    | `/api/estado`        | Si hay una recopilación en curso.                              |
+| GET    | `/api/progreso`      | Progreso, porcentaje y ETA para la barra del frontend.         |
 
 ---
 
@@ -162,6 +214,9 @@ Constantes al inicio de `app.py`:
 | `RECICLAR_PAGINA_CADA` | `25`        | Recrea la pestaña cada N zonas (higiene de memoria). |
 | `MAX_LINEAS_LOG`       | `20000`     | Líneas retenidas en memoria para la consola.         |
 | `SEL_*`                | —           | Selectores del DOM de Google Maps.                   |
+
+Aspecto del Excel (también al inicio de `app.py`): `AZUL` (cabeceras), `AZUL_BANDA`
+(filas alternas), `ANCHOS_COLUMNA` y `CARACTERES_INVALIDOS_HOJA`.
 
 Archivos generados (ignorados por git, se pueden borrar sin miedo):
 

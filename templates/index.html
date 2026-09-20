@@ -133,6 +133,41 @@ Loriguilla</textarea
 
         <p id="estado" class="mt-4 text-sm text-slate-600"></p>
 
+        <!-- Barra de progreso: se mueve según el bot recorre zonas y fichas -->
+        <section
+          id="panel-progreso"
+          class="mt-4 hidden rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200"
+        >
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <span id="prog-zona" class="text-sm font-semibold text-slate-700">
+              Preparando Chromium…
+            </span>
+            <span
+              id="prog-pct"
+              class="font-mono text-sm font-bold text-blue-700"
+            >
+              0 %
+            </span>
+          </div>
+
+          <div
+            class="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
+          >
+            <div
+              id="prog-barra"
+              class="h-full w-0 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 transition-all duration-500 ease-out"
+            ></div>
+          </div>
+
+          <div
+            class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500"
+          >
+            <span id="prog-fichas">—</span>
+            <span id="prog-acumuladas">—</span>
+            <span id="prog-eta">—</span>
+          </div>
+        </section>
+
         <details
           id="panel-errores"
           class="mt-3 hidden rounded-lg bg-amber-50 p-3 text-sm text-amber-800 ring-1 ring-amber-200"
@@ -246,6 +281,13 @@ Loriguilla</textarea
       const panelPreview = $("panel-preview");
       const previewTotal = $("preview-total");
       const previewCuerpo = $("preview-cuerpo");
+      const panelProgreso = $("panel-progreso");
+      const progZona = $("prog-zona");
+      const progPct = $("prog-pct");
+      const progBarra = $("prog-barra");
+      const progFichas = $("prog-fichas");
+      const progAcumuladas = $("prog-acumuladas");
+      const progEta = $("prog-eta");
       const panelLog = $("panel-log");
       const logSalida = $("log-salida");
       const logContador = $("log-contador");
@@ -308,9 +350,13 @@ Loriguilla</textarea
           // Red de seguridad: en pestañas en segundo plano el navegador
           // estrangula los temporizadores, así que podemos perdernos la línea
           // final. Preguntamos directamente si la ejecución sigue viva.
-          if (adjunto) {
-            const r = await fetch("/api/estado", { cache: "no-store" });
-            if (r.ok && !(await r.json()).en_curso) finalizarAdjunto();
+          if (logTimer || adjunto) {
+            const r = await fetch("/api/progreso", { cache: "no-store" });
+            if (r.ok) {
+              const p = await r.json();
+              actualizarProgreso(p);
+              if (adjunto && !p.activo) finalizarAdjunto();
+            }
           }
         } catch (_) {
           /* la consola es best-effort: nunca debe romper el flujo principal */
@@ -353,7 +399,7 @@ Loriguilla</textarea
         // finalizarAdjunto(); si no, seguimos sondeando hasta que termine.
       }
 
-      function finalizarAdjunto() {
+      async function finalizarAdjunto() {
         if (!adjunto) return;
         adjunto = false;
         if (logTimer) clearInterval(logTimer);
@@ -367,6 +413,17 @@ Loriguilla</textarea
         btnDownload.classList.add("inline-flex");
         estado.textContent =
           "✅ La recopilación ha terminado. Ya puedes descargar el Excel.";
+
+        // Totales reales del servidor para cerrar la barra con datos, no supuestos.
+        try {
+          const r = await fetch("/api/progreso", { cache: "no-store" });
+          if (r.ok) {
+            const p = await r.json();
+            finalizarProgreso(p.total_zonas, p.acumuladas, p.segundos);
+          }
+        } catch (_) {
+          finalizarProgreso();
+        }
         cargarPreview();
       }
 
@@ -377,6 +434,77 @@ Loriguilla</textarea
         // Espera a la petición en vuelo para no perder el tramo final.
         while (logPidiendo) await new Promise((r) => setTimeout(r, 120));
         await refrescarLog();
+      }
+
+      /* ------------------------------ progreso ---------------------------------- */
+
+      function formatearDuracion(segundos) {
+        if (segundos == null || !isFinite(segundos)) return "—";
+        const s = Math.max(0, Math.round(segundos));
+        if (s < 60) return `${s} s`;
+        const m = Math.floor(s / 60);
+        if (m < 60) return `${m} min ${String(s % 60).padStart(2, "0")} s`;
+        return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
+      }
+
+      function mostrarProgreso() {
+        panelProgreso.classList.remove("hidden");
+      }
+
+      function reiniciarProgreso() {
+        mostrarProgreso();
+        progBarra.style.width = "0%";
+        progPct.textContent = "0 %";
+        progZona.textContent = "Preparando Chromium…";
+        progFichas.textContent = "—";
+        progAcumuladas.textContent = "—";
+        progEta.textContent = "Calculando tiempo restante…";
+      }
+
+      function actualizarProgreso(p) {
+        mostrarProgreso();
+
+        // total_zonas es 0 hasta que el backend arranca de verdad: mientras tanto
+        // mantenemos el estado "preparando" en lugar de mostrar un 100 % falso.
+        if (!p.total_zonas) return;
+
+        progBarra.style.width = `${p.porcentaje}%`;
+        progPct.textContent = `${p.porcentaje.toFixed(0)} %`;
+
+        progZona.textContent = p.zona_actual
+          ? `Zona ${p.zona_actual}/${p.total_zonas} · «${p.zona_nombre}»`
+          : `${p.total_zonas} zonas en cola`;
+
+        progFichas.textContent = p.fichas_totales
+          ? `Fichas de esta zona: ${p.fichas_hechas}/${p.fichas_totales}`
+          : "Localizando resultados…";
+
+        progAcumuladas.textContent = `${p.acumuladas} únicas acumuladas`;
+
+        if (!p.activo) {
+          progEta.textContent = "✔ completado";
+          return;
+        }
+        progEta.textContent =
+          p.eta_segundos == null
+            ? `Transcurrido: ${formatearDuracion(p.segundos)}`
+            : `Quedan ~${formatearDuracion(p.eta_segundos)} · transcurrido ${formatearDuracion(p.segundos)}`;
+      }
+
+      function finalizarProgreso(zonasRecorridas, acumuladas, segundos) {
+        mostrarProgreso();
+        progBarra.style.width = "100%";
+        progPct.textContent = "100 %";
+        progZona.textContent = "✔ Recopilación completada";
+        progFichas.textContent = zonasRecorridas
+          ? `${zonasRecorridas} zonas recorridas`
+          : "";
+        progAcumuladas.textContent =
+          acumuladas != null ? `${acumuladas} únicas acumuladas` : "";
+        progEta.textContent =
+          segundos != null
+            ? `Tiempo total: ${formatearDuracion(segundos)}`
+            : "";
       }
 
       /* ------------------------------- cronómetro -------------------------------- */
@@ -467,6 +595,7 @@ Loriguilla</textarea
         mostrarErrores([]);
         estado.textContent = `Lanzando ${zonas.length} búsquedas en Google Maps… esto puede tardar.`;
         arrancarCronometro();
+        reiniciarProgreso();
         await arrancarLog();
 
         try {
@@ -488,6 +617,7 @@ Loriguilla</textarea
           btnDownload.classList.remove("hidden");
           btnDownload.classList.add("inline-flex");
           mostrarErrores(data.errores);
+          finalizarProgreso(data.zonas, data.unicos, data.segundos);
           await cargarPreview();
         } catch (err) {
           estado.textContent = `❌ ${err.message}`;
