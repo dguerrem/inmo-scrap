@@ -1,0 +1,692 @@
+{
+  "El Palmar": {
+    "lat": 39.311598,
+    "lng": -0.317681,
+    "radio_km": 4.2,
+    "cp": "46012",
+    "extension_km": 8.5,
+    "puntos": 10.0,
+    "margen": 2.0,
+    "nombre_osm": "el Palmar"
+  },
+  "Valencia": {
+    "lat": 39.469707,
+    "lng": -0.376335,
+    "radio_km": 8.0,
+    "cp": "46002",
+    "extension_km": 32.0,
+    "puntos": 11.0,
+    "margen": 0.0,
+    "nombre_osm": "Valencia"
+  },
+  "Ciutat Vella": {
+    "lat": 39.474622,
+    "lng": -0.376545,
+    "radio_km": 1.2,
+    "cp": "46001",
+    "extension_km": 1.7,
+    "puntos": 10.0,
+    "margen": 9.0,
+    "nombre_osm": "Ciudad Vieja"
+  },
+  "El Carmen": {
+    "lat": 39.478221,
+    "lng": -0.381001,
+    "radio_km": 1.2,
+    "cp": "46003",
+    "extension_km": 0.9,
+    "puntos": 10.0,
+    "margen": 0.5,
+    "nombre_osm": "El Carmen"
+  },
+  "Ruzafa": {
+    "lat": 39.462278,
+    "lng": -0.372071,
+    "radio_km": 1.2,
+    "cp": "46006",
+    "extension_km": 1.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Ruzafa"
+  },
+  "L'Eixample": {
+    "lat": 39.464361,
+    "lng": -0.369397,
+    "radio_km": 1.2,
+    "cp": "46005",
+    "extension_km": 2.1,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "Ensanche"
+  },
+  "Extramurs": {
+    "lat": 39.470861,
+    "lng": -0.388172,
+    "radio_km": 1.4,
+    "cp": "46008",
+    "extension_km": 2.9,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Extramuros"
+  },
+  "Campanar": {
+    "lat": 39.481442,
+    "lng": -0.394697,
+    "radio_km": 1.2,
+    "cp": "46015",
+    "extension_km": 1.3,
+    "puntos": 11.0,
+    "margen": 0.0,
+    "nombre_osm": "Campanar"
+  },
+  "La Saïdia": {
+    "lat": 39.486572,
+    "lng": -0.375187,
+    "radio_km": 1.2,
+    "cp": "46009",
+    "extension_km": 2.2,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "La Zaidía"
+  },
+  "El Pla del Real": {
+    "lat": 39.475566,
+    "lng": -0.360298,
+    "radio_km": 1.2,
+    "cp": "46010",
+    "extension_km": 2.4,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "El Llano del Real"
+  },
+  "L'Olivereta": {
+    "lat": 39.46893,
+    "lng": -0.405034,
+    "radio_km": 1.2,
+    "cp": "46018",
+    "extension_km": 2.4,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "la Olivereta"
+  },
+  "Patraix": {
+    "lat": 39.46258,
+    "lng": -0.391796,
+    "radio_km": 1.2,
+    "cp": "46018",
+    "extension_km": 1.3,
+    "puntos": 11.0,
+    "margen": 0.0,
+    "nombre_osm": "Patraix"
+  },
+  "Jesús": {
+    "lat": 39.44811,
+    "lng": -0.390259,
+    "radio_km": 1.4,
+    "cp": "46017",
+    "extension_km": 2.8,
+    "puntos": 11.0,
+    "margen": 10.0,
+    "nombre_osm": "Jesús"
+  },
+  "Quatre Carreres": {
+    "lat": 39.446813,
+    "lng": -0.359423,
+    "radio_km": 2.2,
+    "cp": "46013",
+    "extension_km": 4.5,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Quatre Carreres"
+  },
+  "Poblats Marítims": {
+    "lat": 39.464602,
+    "lng": -0.337816,
+    "radio_km": 1.2,
+    "cp": "46022",
+    "extension_km": 0.1,
+    "puntos": 5.0,
+    "margen": 4.0,
+    "nombre_osm": "Marítimo"
+  },
+  "El Cabanyal": {
+    "lat": 39.471989,
+    "lng": -0.32868,
+    "radio_km": 1.2,
+    "cp": "46011",
+    "extension_km": 2.2,
+    "puntos": 9.5,
+    "margen": null,
+    "nombre_osm": "el Cabanyal"
+  },
+  "Camins al Grau": {
+    "lat": 39.463058,
+    "lng": -0.348065,
+    "radio_km": 1.2,
+    "cp": "46023",
+    "extension_km": 2.1,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Camins al Grau"
+  },
+  "Avenida del Puerto": {
+    "lat": 39.467658,
+    "lng": -0.358561,
+    "radio_km": 1.2,
+    "cp": "46021",
+    "extension_km": 0.3,
+    "puntos": 1.0,
+    "margen": 0.0,
+    "nombre_osm": "Avenida del Puerto"
+  },
+  "Algirós": {
+    "lat": 39.476272,
+    "lng": -0.343653,
+    "radio_km": 1.2,
+    "cp": "46022",
+    "extension_km": 2.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Algirós"
+  },
+  "Benimaclet": {
+    "lat": 39.486398,
+    "lng": -0.359632,
+    "radio_km": 1.2,
+    "cp": "46020",
+    "extension_km": 1.6,
+    "puntos": 11.0,
+    "margen": 0.0,
+    "nombre_osm": "Benimaclet"
+  },
+  "Rascanya": {
+    "lat": 39.495468,
+    "lng": -0.369428,
+    "radio_km": 1.2,
+    "cp": "46019",
+    "extension_km": 2.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Rascanya"
+  },
+  "Benicalap": {
+    "lat": 39.492003,
+    "lng": -0.391302,
+    "radio_km": 1.2,
+    "cp": "46025",
+    "extension_km": 1.9,
+    "puntos": 11.0,
+    "margen": 0.0,
+    "nombre_osm": "Benicalap"
+  },
+  "Benimàmet": {
+    "lat": 39.500183,
+    "lng": -0.418858,
+    "radio_km": 1.2,
+    "cp": "46035",
+    "extension_km": 1.7,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Benimàmet"
+  },
+  "Beniferri": {
+    "lat": 39.494976,
+    "lng": -0.405815,
+    "radio_km": 1.2,
+    "cp": "46015",
+    "extension_km": 1.2,
+    "puntos": 11.0,
+    "margen": 10.0,
+    "nombre_osm": "Beniferri"
+  },
+  "Poble Nou": {
+    "lat": 39.506391,
+    "lng": -0.384176,
+    "radio_km": 1.4,
+    "cp": "46025",
+    "extension_km": 2.9,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Poble Nou"
+  },
+  "Carpesa": {
+    "lat": 39.517033,
+    "lng": -0.37802,
+    "radio_km": 1.4,
+    "cp": "46016",
+    "extension_km": 2.8,
+    "puntos": 11.0,
+    "margen": 10.0,
+    "nombre_osm": "Carpesa"
+  },
+  "Castellar-Oliveral": {
+    "lat": 39.429691,
+    "lng": -0.363347,
+    "radio_km": 1.2,
+    "cp": "46013",
+    "extension_km": 2.4,
+    "puntos": 10.0,
+    "margen": 9.0,
+    "nombre_osm": "el Castellar - el Oliveral"
+  },
+  "La Torre": {
+    "lat": 39.435056,
+    "lng": -0.391047,
+    "radio_km": 1.2,
+    "cp": "46910",
+    "extension_km": 1.3,
+    "puntos": 10.0,
+    "margen": 2.0,
+    "nombre_osm": "la Torre"
+  },
+  "Forn d'Alcedo": {
+    "lat": 39.432173,
+    "lng": -0.376453,
+    "radio_km": 3.5,
+    "cp": "46026",
+    "extension_km": 0.0,
+    "puntos": 1.0,
+    "margen": null,
+    "nombre_osm": "Forn d'Alcedo"
+  },
+  "Pinedo": {
+    "lat": 39.421716,
+    "lng": -0.338337,
+    "radio_km": 2.5,
+    "cp": "46012",
+    "extension_km": 5.1,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Pinedo"
+  },
+  "El Saler": {
+    "lat": 39.383193,
+    "lng": -0.332889,
+    "radio_km": 4.9,
+    "cp": "46012",
+    "extension_km": 9.8,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "el Saler"
+  },
+  "Mislata": {
+    "lat": 39.475144,
+    "lng": -0.417913,
+    "radio_km": 1.2,
+    "cp": "46920",
+    "extension_km": 2.3,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Mislata"
+  },
+  "Quart de Poblet": {
+    "lat": 39.482725,
+    "lng": -0.443885,
+    "radio_km": 5.6,
+    "cp": "46930",
+    "extension_km": 11.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Quart de Poblet"
+  },
+  "Manises": {
+    "lat": 39.492989,
+    "lng": -0.462143,
+    "radio_km": 3.5,
+    "cp": "46940",
+    "extension_km": 7.1,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Manises"
+  },
+  "Aldaia": {
+    "lat": 39.460098,
+    "lng": -0.48058,
+    "radio_km": 4.8,
+    "cp": "46960",
+    "extension_km": 9.5,
+    "puntos": 11.0,
+    "margen": 0.5,
+    "nombre_osm": "Aldaia"
+  },
+  "Alaquàs": {
+    "lat": 39.457293,
+    "lng": -0.46098,
+    "radio_km": 2.6,
+    "cp": "46970",
+    "extension_km": 5.3,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "Alacuás"
+  },
+  "Torrent": {
+    "lat": 39.436668,
+    "lng": -0.465621,
+    "radio_km": 7.8,
+    "cp": "46900",
+    "extension_km": 15.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Torrente"
+  },
+  "Xirivella": {
+    "lat": 39.465572,
+    "lng": -0.430783,
+    "radio_km": 1.6,
+    "cp": "46950",
+    "extension_km": 3.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Xirivella"
+  },
+  "Paiporta": {
+    "lat": 39.427972,
+    "lng": -0.418425,
+    "radio_km": 1.3,
+    "cp": "46200",
+    "extension_km": 2.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Paiporta"
+  },
+  "Picanya": {
+    "lat": 39.435397,
+    "lng": -0.435878,
+    "radio_km": 2.2,
+    "cp": "46210",
+    "extension_km": 4.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Picanya"
+  },
+  "Sedaví": {
+    "lat": 39.424712,
+    "lng": -0.383458,
+    "radio_km": 1.6,
+    "cp": "46910",
+    "extension_km": 3.3,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Sedaví"
+  },
+  "Benetússer": {
+    "lat": 39.422893,
+    "lng": -0.397478,
+    "radio_km": 1.2,
+    "cp": "46910",
+    "extension_km": 1.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Benetússer"
+  },
+  "Alfafar": {
+    "lat": 39.420075,
+    "lng": -0.389136,
+    "radio_km": 3.5,
+    "cp": "46910",
+    "extension_km": 7.0,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Alfafar"
+  },
+  "Massanassa": {
+    "lat": 39.410856,
+    "lng": -0.400085,
+    "radio_km": 2.8,
+    "cp": "46470",
+    "extension_km": 5.5,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "Masanasa"
+  },
+  "Catarroja": {
+    "lat": 39.403375,
+    "lng": -0.402876,
+    "radio_km": 4.4,
+    "cp": "46470",
+    "extension_km": 8.8,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Catarroja"
+  },
+  "Albal": {
+    "lat": 39.395644,
+    "lng": -0.415082,
+    "radio_km": 4.0,
+    "cp": "46094",
+    "extension_km": 8.1,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Albal"
+  },
+  "Silla": {
+    "lat": 39.363205,
+    "lng": -0.411262,
+    "radio_km": 3.3,
+    "cp": "46460",
+    "extension_km": 6.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Silla"
+  },
+  "Picassent": {
+    "lat": 39.363519,
+    "lng": -0.461179,
+    "radio_km": 5.5,
+    "cp": "46220",
+    "extension_km": 11.1,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Picassent"
+  },
+  "Burjassot": {
+    "lat": 39.50906,
+    "lng": -0.410858,
+    "radio_km": 1.4,
+    "cp": "46100",
+    "extension_km": 2.7,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Burjasot"
+  },
+  "Paterna": {
+    "lat": 39.525942,
+    "lng": -0.473302,
+    "radio_km": 4.4,
+    "cp": "46182",
+    "extension_km": 8.8,
+    "puntos": 11.0,
+    "margen": 0.5,
+    "nombre_osm": "Paterna"
+  },
+  "Godella": {
+    "lat": 39.518428,
+    "lng": -0.410317,
+    "radio_km": 2.8,
+    "cp": "46110",
+    "extension_km": 5.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Godella"
+  },
+  "Rocafort": {
+    "lat": 39.530057,
+    "lng": -0.410938,
+    "radio_km": 1.8,
+    "cp": "46111",
+    "extension_km": 3.5,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Rocafort"
+  },
+  "Moncada": {
+    "lat": 39.545048,
+    "lng": -0.394101,
+    "radio_km": 4.1,
+    "cp": "46113",
+    "extension_km": 8.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Moncada"
+  },
+  "Tavernes Blanques": {
+    "lat": 39.506429,
+    "lng": -0.362599,
+    "radio_km": 1.2,
+    "cp": "46132",
+    "extension_km": 1.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Tabernes Blanques"
+  },
+  "Almàssera": {
+    "lat": 39.511821,
+    "lng": -0.356237,
+    "radio_km": 1.2,
+    "cp": "46132",
+    "extension_km": 2.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Almàssera"
+  },
+  "Meliana": {
+    "lat": 39.528475,
+    "lng": -0.348861,
+    "radio_km": 1.9,
+    "cp": "46133",
+    "extension_km": 3.7,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Meliana"
+  },
+  "Foios": {
+    "lat": 39.538154,
+    "lng": -0.35614,
+    "radio_km": 3.1,
+    "cp": "46134",
+    "extension_km": 6.3,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Foios"
+  },
+  "Albalat dels Sorells": {
+    "lat": 39.543695,
+    "lng": -0.346191,
+    "radio_km": 3.1,
+    "cp": "46134",
+    "extension_km": 6.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Albalat dels Sorells"
+  },
+  "Museros": {
+    "lat": 39.560307,
+    "lng": -0.336595,
+    "radio_km": 2.8,
+    "cp": "46136",
+    "extension_km": 5.5,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Museros"
+  },
+  "Massamagrell": {
+    "lat": 39.5704,
+    "lng": -0.33021,
+    "radio_km": 3.3,
+    "cp": "46130",
+    "extension_km": 6.6,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Massamagrell"
+  },
+  "Pobla de Farnals": {
+    "lat": 39.577785,
+    "lng": -0.32643,
+    "radio_km": 2.6,
+    "cp": "46139",
+    "extension_km": 5.2,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Puebla de Farnáls"
+  },
+  "Rafelbunyol": {
+    "lat": 39.588463,
+    "lng": -0.332542,
+    "radio_km": 2.2,
+    "cp": "46138",
+    "extension_km": 4.4,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Rafelbunyol"
+  },
+  "El Puig": {
+    "lat": 39.588782,
+    "lng": -0.306257,
+    "radio_km": 4.8,
+    "cp": "46540",
+    "extension_km": 9.6,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "El Puig"
+  },
+  "Puçol": {
+    "lat": 39.617223,
+    "lng": -0.302827,
+    "radio_km": 4.0,
+    "cp": "46530",
+    "extension_km": 8.1,
+    "puntos": 10.0,
+    "margen": null,
+    "nombre_osm": "Puzol"
+  },
+  "Llíria": {
+    "lat": 39.625148,
+    "lng": -0.595275,
+    "radio_km": 8.0,
+    "cp": "46160",
+    "extension_km": 22.0,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Llíria"
+  },
+  "Riba-roja de Túria": {
+    "lat": 39.546352,
+    "lng": -0.569966,
+    "radio_km": 5.5,
+    "cp": "46190",
+    "extension_km": 10.9,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Riba-roja de Túria"
+  },
+  "L'Eliana": {
+    "lat": 39.565909,
+    "lng": -0.530278,
+    "radio_km": 2.2,
+    "cp": "46183",
+    "extension_km": 4.5,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "L'Eliana"
+  },
+  "Loriguilla": {
+    "lat": 39.490506,
+    "lng": -0.572243,
+    "radio_km": 8.0,
+    "cp": "46393",
+    "extension_km": 45.5,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Loriguilla"
+  },
+  "Benimamet": {
+    "lat": 39.500183,
+    "lng": -0.418858,
+    "radio_km": 1.2,
+    "cp": "46035",
+    "extension_km": 1.7,
+    "puntos": 11.0,
+    "margen": null,
+    "nombre_osm": "Benimàmet"
+  }
+}

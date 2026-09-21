@@ -63,6 +63,7 @@ La Torre
 Forn d'Alcedo
 Pinedo
 El Saler
+El Palmar
 Mislata
 Quart de Poblet
 Manises
@@ -254,6 +255,7 @@ Loriguilla</textarea
                 <th class="px-3 py-2">Nombre</th>
                 <th class="px-3 py-2">Dirección</th>
                 <th class="px-3 py-2">Barrio/Población</th>
+                <th class="px-3 py-2">Dist. (km)</th>
                 <th class="px-3 py-2">Teléfono</th>
                 <th class="px-3 py-2">Web</th>
               </tr>
@@ -556,12 +558,15 @@ Loriguilla</textarea
               item.nombre,
               item.direccion,
               item.barrio,
+              item.distancia_km != null ? `${item.distancia_km} km` : "",
               item.telefono,
               item.web,
             ].forEach((valor, i) => {
               const td = document.createElement("td");
+              const centrada = i === 3;
               td.className =
                 "max-w-xs truncate px-3 py-2 align-top " +
+                (centrada ? "text-center " : "") +
                 (i === 0 ? "font-medium text-slate-900" : "text-slate-600");
               td.textContent = valor || "—";
               td.title = valor || "";

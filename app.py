@@ -20,6 +20,7 @@ import io
 import itertools
 import json
 import logging
+import math
 import os
 import random
 import re
@@ -49,6 +50,8 @@ from playwright.sync_api import sync_playwright
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 DATA_FILE = BASE_DIR / "data_temp.json"
+DESCARTES_FILE = BASE_DIR / "descartados_temp.json"
+ZONAS_FILE = BASE_DIR / "zonas_valencia.json"
 
 PLANTILLA_URL = "https://www.google.com/maps/search/{termino}?hl=es"
 USER_AGENT = (
@@ -76,6 +79,7 @@ COLUMNAS: tuple[tuple[str, str], ...] = (
     ("nombre", "Nombre"),
     ("direccion", "Dirección"),
     ("barrio", "Barrio/Población"),
+    ("distancia_km", "Distancia (km)"),
     ("telefono", "Teléfono"),
     ("web", "Web"),
 )
@@ -91,6 +95,105 @@ JS_ENLACES = (
     "() => Array.from(document.querySelectorAll('div[role=\"feed\"] a.hfpxzc'))"
     ".map(a => ({ href: a.href, nombre: (a.getAttribute('aria-label') || '').trim() }))"
 )
+
+# --------------------------------------------------------------------------- #
+# Filtrado geográfico
+#
+# Google Maps devuelve, para la misma consulta, conjuntos de resultados muy
+# distintos: buscando "inmobiliarias en Carpesa" se han llegado a recibir 117
+# resultados con negocios a 709 km. No respeta la zona del texto ni el viewport
+# de la URL. Lo único fiable es que cada enlace del feed lleva las coordenadas
+# exactas del negocio, así que filtramos por distancia al centro real de la zona.
+# --------------------------------------------------------------------------- #
+COORD_ENLACE = re.compile(r"!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)")
+_descartes: list[dict[str, Any]] = []      # resultados fuera de radio, para la hoja "Descartados"
+_lock_descartes = threading.Lock()
+_zonas_de_esta_ejecucion: set[str] = set()
+
+
+def _cargar_zonas() -> dict[str, dict]:
+    """Centros y radios por zona. Si falta el fichero, se trabaja sin filtro."""
+    if not ZONAS_FILE.exists():
+        return {}
+    try:
+        datos = json.loads(ZONAS_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        # Ojo: aquí todavía no existe el logger, así que no se puede usar `log`.
+        print(f"[!] {ZONAS_FILE.name} está corrupto: se trabaja sin filtro geográfico")
+        return {}
+    return datos if isinstance(datos, dict) else {}
+
+
+ZONAS_GEO = _cargar_zonas()
+
+
+def _coords_de_enlace(href: str) -> tuple[float, float] | None:
+    """Las coordenadas del negocio vienen dentro del propio href del feed."""
+    coincidencia = COORD_ENLACE.search(href or "")
+    return (float(coincidencia.group(1)), float(coincidencia.group(2))) if coincidencia else None
+
+
+def km_entre(a: tuple[float, float], b: tuple[float, float]) -> float:
+    """Distancia en kilómetros entre dos puntos (Haversine)."""
+    radio = 6371.0
+    lat1, lat2 = math.radians(a[0]), math.radians(b[0])
+    dlat = lat2 - lat1
+    dlng = math.radians(b[1] - a[1])
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlng / 2) ** 2
+    return 2 * radio * math.asin(math.sqrt(h))
+
+
+def _distancia_a_zona(coords: tuple[float, float], zona: str) -> float | None:
+    """Distancia al centro de la zona, o None si esa zona no tiene centro conocido."""
+    centro = ZONAS_GEO.get(zona)
+    if not centro:
+        return None
+    return km_entre(coords, (centro["lat"], centro["lng"]))
+
+
+def _dentro_de_zona(coords: tuple[float, float] | None, zona: str) -> bool:
+    """¿Está el resultado dentro del radio de la zona? Sin datos, se acepta."""
+    centro = ZONAS_GEO.get(zona)
+    if not centro:
+        return True          # zona sin geolocalizar: no filtramos
+    if coords is None:
+        return True          # enlace sin coordenadas: no podemos juzgar, se acepta
+    return km_entre(coords, (centro["lat"], centro["lng"])) <= centro["radio_km"]
+
+
+def _registrar_descarte(nombre: str, zona: str, distancia: float | None, motivo: str) -> None:
+    with _lock_descartes:
+        _descartes.append(
+            {
+                "nombre": nombre,
+                "barrio": zona,
+                "distancia_km": round(distancia, 1) if distancia is not None else "",
+                "motivo": motivo,
+            }
+        )
+
+
+def _zona_mas_cercana(
+    coords: tuple[float, float] | None, barrio_original: str
+) -> str:
+    """
+    Reasigna cada inmobiliaria a la zona cuyo centro tiene más cerca.
+
+    Sin esto, al rastrear "Valencia" con sus 8 km de radio se quedaría con casi
+    todo, y hojas como Ruzafa o El Carmen saldrían casi vacías.
+    """
+    if coords is None:
+        return barrio_original
+    candidatas = [z for z in ZONAS_GEO if z in _zonas_de_esta_ejecucion] or [barrio_original]
+    mejor, mejor_distancia = barrio_original, None
+    for zona in candidatas:
+        distancia = _distancia_a_zona(coords, zona)
+        if distancia is not None and (mejor_distancia is None or distancia < mejor_distancia):
+            mejor, mejor_distancia = zona, distancia
+    return mejor
+
+
+_zonas_de_esta_ejecucion: set[str] = set()
 
 # --------------------------------------------------------------------------- #
 # Log en directo: stdout + archivo rotativo + buffer en memoria para el frontend
@@ -260,18 +363,47 @@ def scrape(peticion: ScrapeRequest) -> dict[str, Any]:
         inicio = time.time()
         with _lock_log:
             _registro.clear()
+        with _lock_descartes:
+            _descartes.clear()
+        _zonas_de_esta_ejecucion.clear()
+        _zonas_de_esta_ejecucion.update(zonas)
         _reiniciar_progreso(len(zonas))
         log.info("═══ Nueva recopilación · %d zonas ═══", len(zonas))
 
+        _geolocalizar_desconocidas(zonas)
+        sin_geo = [z for z in zonas if z not in ZONAS_GEO]
+        if sin_geo:
+            log.warning(
+                "Sin datos geográficos para %d zona(s): se aceptarán todos sus resultados. "
+                "Añádelas con: .venv/bin/python generar_zonas.py %s",
+                len(sin_geo),
+                " ".join(f'"{z}"' for z in sin_geo[:6]),
+            )
+        else:
+            radios = [ZONAS_GEO[z]["radio_km"] for z in zonas if z in ZONAS_GEO]
+            log.info(
+                "Filtro geográfico activo · radio %s km según el tamaño real de cada zona",
+                (
+                    f"{min(radios)}-{max(radios)}"
+                    if radios and min(radios) != max(radios)
+                    else (f"{radios[0]}" if radios else "?")
+                ),
+            )
+
         registros, errores = _scrape_zonas(zonas)
-        unicos = deduplicar(registros)
-        _guardar_datos(unicos)
+        with _lock_descartes:
+            descartados = list(_descartes)
+        unicos = reasignar_zonas(deduplicar(registros))
+        _guardar_datos(_sin_coords_auxiliares(unicos))
+        _guardar_descartes(descartados)
 
         log.info(
-            "═══ Terminado · %d únicas de %d brutos · %d duplicadas · %.1f min ═══",
+            "═══ Terminado · %d únicas de %d brutos · %d duplicadas · %d descartadas "
+            "por distancia · %.1f min ═══",
             len(unicos),
             len(registros),
             len(registros) - len(unicos),
+            len(descartados),
             (time.time() - inicio) / 60,
         )
         return {
@@ -280,6 +412,8 @@ def scrape(peticion: ScrapeRequest) -> dict[str, Any]:
             "resultados": len(registros),
             "unicos": len(unicos),
             "duplicados": len(registros) - len(unicos),
+            "descartados": len(descartados),
+            "sin_geo": sin_geo,
             "errores": errores,
             "segundos": round(time.time() - inicio, 1),
         }
@@ -341,7 +475,7 @@ def download() -> StreamingResponse:
             status_code=404,
             detail="Todavía no hay datos. Ejecuta primero «Recopilar datos».",
         )
-    buffer = _excel_en_memoria(items)
+    buffer = _excel_en_memoria(items, _leer_descartes())
     nombre = f"inmobiliarias_valencia_{datetime.now():%Y%m%d_%H%M}.xlsx"
     return StreamingResponse(
         buffer,
@@ -353,6 +487,57 @@ def download() -> StreamingResponse:
 # --------------------------------------------------------------------------- #
 # Scraping (Playwright, sincrónico -> FastAPI lo ejecuta en un hilo aparte)
 # --------------------------------------------------------------------------- #
+def _guardar_zonas_geo() -> None:
+    try:
+        ZONAS_FILE.write_text(
+            json.dumps(ZONAS_GEO, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except OSError as exc:
+        log.warning("No se pudo guardar %s: %s", ZONAS_FILE.name, exc)
+
+
+def _geolocalizar_desconocidas(zonas: list[str]) -> None:
+    """
+    Geolocaliza al vuelo las zonas que no estén en `zonas_valencia.json`.
+
+    Sin esto, escribir una zona nueva (por ejemplo "El Palmar") dejaría la
+    búsqueda sin filtro y volverían a colarse resultados de toda España. Se pide
+    una sola vez por zona y queda cacheada para las siguientes ejecuciones.
+    """
+    desconocidas = [z for z in zonas if z not in ZONAS_GEO]
+    if not desconocidas:
+        return
+
+    log.info("Geolocalizando %d zona(s) nueva(s): %s", len(desconocidas), ", ".join(desconocidas))
+    try:
+        import generar_zonas  # import local: solo se necesita si hay zonas nuevas
+    except Exception as exc:  # noqa: BLE001
+        log.warning(
+            "No se pudo cargar generar_zonas (%s): esas zonas irán sin filtro geográfico",
+            exc,
+        )
+        return
+
+    nuevas = 0
+    for zona in desconocidas:
+        try:
+            datos, _ = generar_zonas.geocodificar(zona)
+        except Exception as exc:  # noqa: BLE001 - sin red o Nominatim caído
+            log.warning("  «%s»: no se pudo geolocalizar (%s)", zona, exc)
+            continue
+        if not datos:
+            log.warning("  «%s»: sin coincidencia fiable, irá sin filtro", zona)
+            continue
+        ZONAS_GEO[zona] = datos
+        nuevas += 1
+        log.info(
+            "  «%s»: %.5f,%.5f · radio %.1f km", zona, datos["lat"], datos["lng"], datos["radio_km"]
+        )
+    if nuevas:
+        _guardar_zonas_geo()
+        log.info("%d zona(s) añadidas a %s", nuevas, ZONAS_FILE.name)
+
+
 def _limpiar_zonas(zonas: list[str]) -> list[str]:
     """Normaliza la lista y elimina zonas repetidas respetando el orden."""
     limpias: list[str] = []
@@ -412,8 +597,8 @@ def _scrape_zonas(zonas: list[str]) -> tuple[list[dict[str, str]], list[dict[str
                     items = _scrape_zona(pagina, zona)
                     registros.extend(items)
                     # Salvaguarda: si el proceso muere en la zona 60, las anteriores ya están a salvo
-                    unicos = deduplicar(registros)
-                    _guardar_datos(unicos)
+                    unicos = reasignar_zonas(deduplicar(registros))
+                    _guardar_datos(_sin_coords_auxiliares(unicos))
                     _actualizar_progreso(acumuladas=len(unicos))
                     log.info(
                         "[%d/%d] «%s» · %d inmobiliarias en %.1f s · %d únicas acumuladas",
@@ -459,6 +644,8 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     if "/maps/place/" in pagina.url:
         item = _extraer_ficha(pagina)
         item["barrio"] = zona
+        coords = _coords_de_enlace(pagina.url)
+        _anotar_coords(item, coords)
         _actualizar_progreso(fichas_hechas=1, fichas_totales=1)
         log.info("      un único resultado: redirigido directamente a la ficha")
         return [item] if item["nombre"] else []
@@ -472,7 +659,7 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     log.info("      panel de resultados listo en %.1f s", time.perf_counter() - t)
 
     t = time.perf_counter()
-    enlaces = _recolectar_enlaces(pagina)
+    enlaces = _recolectar_enlaces(pagina, zona)
     total_fichas = len(enlaces)
     _actualizar_progreso(fichas_hechas=0, fichas_totales=total_fichas)
     log.info(
@@ -491,6 +678,7 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
             "telefono": "",
             "web": "",
         }
+        _anotar_coords(item, _coords_de_enlace(href))
         problema = ""
         try:
             pagina.goto(href, wait_until="domcontentloaded", timeout=45_000)
@@ -525,21 +713,38 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     return items
 
 
-def _recolectar_enlaces(pagina) -> dict[str, str]:
+def _recolectar_enlaces(pagina, zona: str) -> dict[str, str]:
     """
-    Hace scroll DENTRO del panel de resultados y va acumulando {href: nombre}.
-    Se acumula sobre la marcha para no perder tarjetas si Google virtualiza el feed.
+    Hace scroll DENTRO del panel de resultados y acumula {href: nombre}.
+
+    Aquí se aplica el filtro geográfico: Google devuelve a menudo negocios de
+    cualquier parte del país, y como cada enlace lleva sus coordenadas podemos
+    descartarlos ANTES de abrir la ficha, que es la parte lenta. Además de
+    limpiar los datos, esto puede ahorrar la mayor parte del tiempo de la zona.
     """
     encontrados: dict[str, str] = {}
     anterior = -1
     sin_novedad = 0
+    fuera_de_radio = 0
 
     for ciclo in range(MAX_CICLOS_SCROLL):
         try:
             for fila in pagina.evaluate(JS_ENLACES):
                 href = (fila.get("href") or "").strip()
-                if href and href not in encontrados:
-                    encontrados[href] = (fila.get("nombre") or "").strip()
+                if not href or href in encontrados:
+                    continue
+                nombre = (fila.get("nombre") or "").strip()
+                coords = _coords_de_enlace(href)
+                if _dentro_de_zona(coords, zona):
+                    encontrados[href] = nombre
+                else:
+                    fuera_de_radio += 1
+                    _registrar_descarte(
+                        nombre,
+                        zona,
+                        _distancia_a_zona(coords, zona),
+                        "fuera del radio de la zona",
+                    )
         except Exception:  # noqa: BLE001
             pass
 
@@ -548,10 +753,10 @@ def _recolectar_enlaces(pagina) -> dict[str, str]:
         else:
             sin_novedad = 0
             log.info(
-                "      scroll %d · %d resultados (+%d)",
+                "      scroll %d · %d dentro de la zona%s",
                 ciclo + 1,
                 len(encontrados),
-                len(encontrados) - max(anterior, 0),
+                f" (+{fuera_de_radio} descartados por distancia)" if fuera_de_radio else "",
             )
         anterior = len(encontrados)
 
@@ -564,7 +769,23 @@ def _recolectar_enlaces(pagina) -> dict[str, str]:
             pass
         pagina.wait_for_timeout(ESPERA_SCROLL_MS)
 
+    if fuera_de_radio:
+        log.info(
+            "      filtro geográfico: %d descartados, %d se quedan",
+            fuera_de_radio,
+            len(encontrados),
+        )
     return encontrados
+
+
+def _anotar_coords(item: dict[str, Any], coords: tuple[float, float] | None) -> None:
+    """Guarda las coordenadas del negocio y su distancia al centro de la zona."""
+    if coords is None:
+        return
+    item["_lat"], item["_lng"] = coords
+    distancia = _distancia_a_zona(coords, item.get("barrio", ""))
+    if distancia is not None:
+        item["distancia_km"] = round(distancia, 2)
 
 
 def _fin_de_lista(pagina) -> bool:
@@ -730,6 +951,60 @@ def _guardar_datos(items: list[dict[str, str]]) -> None:
     os.replace(temporal, DATA_FILE)
 
 
+def _guardar_descartes(items: list[dict[str, Any]]) -> None:
+    temporal = DESCARTES_FILE.with_suffix(".json.tmp")
+    temporal.write_text(
+        json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    os.replace(temporal, DESCARTES_FILE)
+
+
+def _leer_descartes() -> list[dict[str, Any]]:
+    if not DESCARTES_FILE.exists():
+        return []
+    try:
+        datos = json.loads(DESCARTES_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    return datos if isinstance(datos, list) else []
+
+
+def reasignar_zonas(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    """
+    Reparte cada inmobiliaria entre las zonas de esta ejecución según cuál tenga
+    el centro más próximo, no según la búsqueda que la encontró.
+
+    Es necesario porque las búsquedas se solapan: al rastrear "Valencia" (radio de
+    8 km) entraría casi todo, y hojas como Ruzafa o El Carmen saldrían vacías.
+    Si una zona no tiene centro conocido, se respeta el barrio original.
+
+    Conserva las coordenadas auxiliares: se llama también en el guardado
+    incremental, así que limpiarlas aquí rompería las pasadas siguientes.
+    """
+    for item in items:
+        coords = None
+        if item.get("_lat") is not None and item.get("_lng") is not None:
+            coords = (item["_lat"], item["_lng"])
+        original = item.get("barrio", "")
+        asignada = _zona_mas_cercana(coords, original)
+        if asignada != original:
+            item["barrio_buscado"] = original
+        item["barrio"] = asignada
+        if coords is not None:
+            distancia = _distancia_a_zona(coords, asignada)
+            if distancia is not None:
+                item["distancia_km"] = round(distancia, 2)
+    return items
+
+
+def _sin_coords_auxiliares(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Quita las coordenadas internas: no pintan nada en el JSON ni en el Excel."""
+    for item in items:
+        item.pop("_lat", None)
+        item.pop("_lng", None)
+    return items
+
+
 def _leer_datos() -> list[dict[str, str]]:
     if not DATA_FILE.exists():
         return []
@@ -754,24 +1029,93 @@ AZUL_DATO = "1F3B63"
 BORDE_FINO = Side(style="thin", color=GRIS_BORDE)
 BORDE_CELDA = Border(left=BORDE_FINO, right=BORDE_FINO, top=BORDE_FINO, bottom=BORDE_FINO)
 
-ANCHOS_COLUMNA = (42, 56, 26, 17, 48)   # una por columna de COLUMNAS
+ANCHOS_COLUMNA = (42, 56, 26, 14, 17, 48)   # una por columna de COLUMNAS
 CARACTERES_INVALIDOS_HOJA = re.compile(r"[:\\/?*\[\]]")
 
 
-def _excel_en_memoria(items: list[dict[str, str]]) -> io.BytesIO:
+def _excel_en_memoria(
+    items: list[dict[str, str]], descartados: list[dict[str, Any]] | None = None
+) -> io.BytesIO:
     """Libro con una hoja resumen + una hoja por barrio/población, todo formateado."""
     libro = Workbook()
     libro.remove(libro.active)  # sin la hoja "Sheet" vacía por defecto
 
     reservados = {"resumen"}
-    _hoja_resumen(libro, items)
+    _hoja_resumen(libro, items, descartados or [])
     for zona, filas in _agrupar_por_zona(items):
         _hoja_zona(libro, _nombre_hoja(zona, reservados), filas)
+    if descartados:
+        _hoja_descartados(libro, _nombre_hoja("Descartados", reservados), descartados)
 
     buffer = io.BytesIO()
     libro.save(buffer)
     buffer.seek(0)
     return buffer
+
+
+def _hoja_descartados(
+    libro: Workbook, nombre: str, descartados: list[dict[str, Any]]
+) -> None:
+    """
+    Resultados que Google devolvió para una zona pero estaban fuera de su radio.
+
+    Existe para poder auditar el filtro: si aquí aparece un negocio que debería
+    estar en la hoja de su zona, es que ese radio se queda corto y hay que subirlo
+    en `zonas_valencia.json`.
+    """
+    hoja = libro.create_sheet(nombre)
+
+    hoja.merge_cells("A1:D1")
+    titulo = hoja["A1"]
+    titulo.value = (
+        f"{len(descartados)} resultados descartados por estar fuera del radio de su zona"
+    )
+    titulo.fill = PatternFill("solid", fgColor=AZUL)
+    titulo.font = Font(bold=True, size=12, color="FFFFFF")
+    titulo.alignment = Alignment(vertical="center", indent=1)
+    hoja.row_dimensions[1].height = 30
+
+    hoja.merge_cells("A2:D2")
+    hoja["A2"].value = (
+        "Google devuelve resultados de toda la geografía para una misma búsqueda. "
+        "Se conservan aquí para poder ajustar los radios si hiciera falta."
+    )
+    hoja["A2"].font = Font(size=9, italic=True, color=GRIS_TEXTO)
+    hoja["A2"].alignment = Alignment(vertical="center", indent=1)
+    hoja.row_dimensions[2].height = 20
+
+    _pintar_cabecera(hoja, 4, ("Nombre", "Zona buscada", "Distancia al centro (km)", "Motivo"))
+
+    ordenados = sorted(
+        descartados,
+        key=lambda d: (d.get("barrio", ""), -(float(d.get("distancia_km") or 0))),
+    )
+    for indice, descartado in enumerate(ordenados):
+        fila = 5 + indice
+        valores = (
+            descartado.get("nombre", ""),
+            descartado.get("barrio", ""),
+            descartado.get("distancia_km", ""),
+            descartado.get("motivo", ""),
+        )
+        for columna, valor in enumerate(valores, start=1):
+            celda = hoja.cell(row=fila, column=columna, value=valor)
+            celda.border = BORDE_CELDA
+            celda.font = Font(size=10)
+            celda.alignment = Alignment(vertical="center", indent=1)
+            if indice % 2:
+                celda.fill = PatternFill("solid", fgColor=AZUL_BANDA)
+        hoja.cell(row=fila, column=1).font = Font(size=10, bold=True, color=AZUL_DATO)
+        hoja.cell(row=fila, column=3).alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
+        hoja.row_dimensions[fila].height = 18
+
+    for columna, ancho in enumerate((44, 22, 24, 34), start=1):
+        hoja.column_dimensions[get_column_letter(columna)].width = ancho
+    hoja.freeze_panes = "A5"
+    hoja.auto_filter.ref = f"A4:D{4 + len(ordenados)}"
+    hoja.sheet_view.showGridLines = False
 
 
 def _agrupar_por_zona(items: list[dict[str, str]]) -> list[tuple[str, list[dict[str, str]]]]:
@@ -799,7 +1143,9 @@ def _nombre_hoja(zona: str, reservados: set[str]) -> str:
     return nombre
 
 
-def _hoja_resumen(libro: Workbook, items: list[dict[str, str]]) -> None:
+def _hoja_resumen(
+    libro: Workbook, items: list[dict[str, str]], descartados: list[dict[str, Any]]
+) -> None:
     """Portada con totales y desglose por zona, listo para segmentar de un vistazo."""
     hoja = libro.create_sheet("Resumen", 0)
     grupos = _agrupar_por_zona(items)
@@ -822,7 +1168,8 @@ def _hoja_resumen(libro: Workbook, items: list[dict[str, str]]) -> None:
     subtitulo = hoja["A2"]
     subtitulo.value = (
         f"Generado el {datetime.now():%d/%m/%Y a las %H:%M} · "
-        f"{total} inmobiliarias únicas en {len(grupos)} zonas"
+        f"{total} inmobiliarias en {len(grupos)} zonas"
+        + (f" · {len(descartados)} descartadas por distancia" if descartados else "")
     )
     subtitulo.font = Font(size=10, italic=True, color=GRIS_TEXTO)
     subtitulo.alignment = Alignment(horizontal="left", vertical="center", indent=1)

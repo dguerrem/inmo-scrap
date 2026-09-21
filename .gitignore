@@ -9,6 +9,8 @@ __pycache__/
 # Datos generados en runtime
 data_temp.json
 data_temp.json.tmp
+descartados_temp.json
+descartados_temp.json.tmp
 *.xlsx
 
 # Logs
