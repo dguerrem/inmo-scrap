@@ -1,0 +1,994 @@
+[
+  {
+    "nombre": "La Salud Hospital",
+    "direccion": "C/ del Dr. Manuel Candela, 41, Camins al Grau, 46021 València, Valencia",
+    "zona": "Algirós",
+    "telefono": "963897700",
+    "web": "http://www.lasaludhospital.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "IMED Valencia",
+    "direccion": "Av. de la Ilustración, 1, 46100 Burjassot, Valencia",
+    "zona": "Beniferri",
+    "telefono": "963003000",
+    "web": "http://www.imedvalencia.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Arnau de Vilanova",
+    "direccion": "Carrer de Sant Clement, 12, Campanar, 46015 València, Valencia",
+    "zona": "Beniferri",
+    "telefono": "961976000",
+    "web": "https://arnau.san.gva.es/es/hospital-arnau-de-vilanova",
+    "emails": "comitebioetica_arnau@gva.es, harnau_saip@gva.es"
+  },
+  {
+    "nombre": "Hospital IMED Valencia Urgencias",
+    "direccion": "Av. de la Ilustración, 1, 46100 Burjassot, Valencia",
+    "zona": "Beniferri",
+    "telefono": "963003000",
+    "web": "http://www.imedvalencia.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Burjasot I",
+    "direccion": "Carrer Beniferri, s/n, 46100 Burjassot, Valencia",
+    "zona": "Beniferri",
+    "telefono": "963469470",
+    "web": "http://arnau.san.gva.es/centro-de-especialidades-burjassot",
+    "emails": "comitebioetica_arnau@gva.es, harnau_saip@gva.es"
+  },
+  {
+    "nombre": "Hospital Quirónsalud Valencia",
+    "direccion": "Av. de Blasco Ibáñez, 14, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Clínico Universitario de Valencia",
+    "direccion": "Av. de Blasco Ibáñez, 17, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "961973500",
+    "web": "https://www.hospitalesonline.es/valencia/hospital-clinico-universitario-de-valencia",
+    "emails": "hclinico_saip@gva.es"
+  },
+  {
+    "nombre": "Traumatología Arcot",
+    "direccion": "Av. de Blasco Ibáñez, 14, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "",
+    "web": "https://traumatologoarcot.es/",
+    "emails": "arodriguez1401@gmail.com, contacto@traumatologoarcot.es"
+  },
+  {
+    "nombre": "Centre de Salut Benimaclet",
+    "direccion": "Carrer de la Guàrdia Civil, 13, Benimaclet, 46020 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963108160",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Quirón Valencia: Edificio de Consultas 5",
+    "direccion": "Av. de Blasco Ibáñez, 14, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963390400",
+    "web": "http://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Quirónsalud Valencia - Urgencias",
+    "direccion": "Av. de Blasco Ibáñez, 14, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Alfahuir",
+    "direccion": "Carrer d'Ismael Merlo, 4, Benimaclet, 46020 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963176710",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "ASCIRES Universidades",
+    "direccion": "C. de Menéndez y Pelayo, 25, El Llano del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963404790",
+    "web": "https://www.clinicasascires.com/clinicas/universitats",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro Médico Quirónsalud Severo Ochoa",
+    "direccion": "C. Severo Ochoa, 14, El Llano del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro Médico Quirónsalud Blasco Ibáñez",
+    "direccion": "Av. de Blasco Ibáñez, 2, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro Médico Quirónsalud Artes Gráficas",
+    "direccion": "C/ de les Arts Gràfiques, 4, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro Médico Mapfre",
+    "direccion": "Pl. de la Legió Espanyola, 13, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "962565760",
+    "web": "https://www.centromedicomapfre.es/centros/10/valencia",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Baró",
+    "direccion": "Av. de Valladolid, 13, Benimaclet, 46020 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "600586235",
+    "web": "https://www.clinicabaro.com/",
+    "emails": "clinicabaro@gmail.com"
+  },
+  {
+    "nombre": "Consultas Externas. Pabellón D",
+    "direccion": "Carrer del Dr. Gómez Ferrer, 2, El Pla del Real, 46010 València, Valencia",
+    "zona": "Benimaclet",
+    "telefono": "961973500",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud de Benimámet",
+    "direccion": "C/ de l'Enginyer Aubán, 20, Pobles de l'Oest, 46035 València, Valencia",
+    "zona": "Benimàmet",
+    "telefono": "963178255",
+    "web": "https://www.valencia.es/ayuntamiento/infociudad_accesible.nsf/vDocumentosWebListado/D3F1B78580DB3305C12572C20023E040?OpenDocument&bdOrigen=&idapoyo=&nivel=9&lang=1",
+    "emails": ""
+  },
+  {
+    "nombre": "IMED análisis clínicos",
+    "direccion": "Av. de las Jacarandas, 2, 46100 València, Valencia",
+    "zona": "Benimàmet",
+    "telefono": "",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Especialidades El Grao",
+    "direccion": "C/ del Pare Porta, 10, Poblats Marítims, 46024 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963469560",
+    "web": "http://clinicomalvarrosa.san.gva.es/centro-de-especialidades-el-grao1",
+    "emails": "unidadcalidad_hcv@gva.es, urgencias_hcv@gva.es"
+  },
+  {
+    "nombre": "Centro Médico Sanitas Valencia",
+    "direccion": "Av. de les Balears, 71, Camins al Grau, 46023 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963520907",
+    "web": "https://centromedicomilenium-valencia.sanitas.es/?gmb=gmb%3Af-google%3Am-link%3Anc-cmvalencia%3Ap-hospitales",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salut Trafalgar",
+    "direccion": "Carrer de Trafalgar, 32, Camins al Grau, 46023 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963108130",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "EV Medical Sorolla",
+    "direccion": "Carrer del Músic Ginés, 8, bajo, Algirós, 46022 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963560307",
+    "web": "https://www.evmedical.com/sorolla/es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Serrería II",
+    "direccion": "Carrer de Pere de València, 28, Algirós, 46022 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963469400",
+    "web": "http://clinicomalvarrosa.san.gva.es/centro-de-salud-serreria-ii",
+    "emails": "paci_csserreria2@gva.es, unidadcalidad_hcv@gva.es, urgencias_hcv@gva.es"
+  },
+  {
+    "nombre": "IVADI Salud | Especialistas en digestivo y obesidad en Valencia",
+    "direccion": "C/ del Dr. Manuel Candela, 41, 2ª planta, consulta 2.3, Camins al Grau, 46021 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "686815716",
+    "web": "http://www.ivadi.es/",
+    "emails": "consulta@ivadi.es"
+  },
+  {
+    "nombre": "Clínica Serralta | H. Casa de Salud",
+    "direccion": "C/ del Dr. Manuel Candela, 41, Camins al Grau, 46021 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "628251128",
+    "web": "http://www.clinicaserralta.com/",
+    "emails": "00administracion@clinicaserralta.com, administracion@clinicaserralta.com, comunicacion@clinicaserralta.com, secretaria@clinicaserralta.com"
+  },
+  {
+    "nombre": "Clínica Levante",
+    "direccion": "C/ del Dr. Manuel Candela, 10, Camins al Grau, 46021 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963442226",
+    "web": "https://clinicalevante.es/",
+    "emails": "clinicaslevante@gmail.com"
+  },
+  {
+    "nombre": "Centro de Salud República Argentina",
+    "direccion": "Carrer de la República Argentina, 8, Algirós, 46021 València, Valencia",
+    "zona": "Camins al Grau",
+    "telefono": "963108700",
+    "web": "http://www.san.gva.es/",
+    "emails": "participa_normativa_centros@gva.es"
+  },
+  {
+    "nombre": "ASCIRES Campanar",
+    "direccion": "Marqués de San Juan, 6, Avinguda de Campanar, 116, y 4, Consultas:, Valencia",
+    "zona": "Campanar",
+    "telefono": "963404077",
+    "web": "https://www.clinicasascires.com/clinicas/campanar",
+    "emails": ""
+  },
+  {
+    "nombre": "Punto de Atención Sanitaria (PAS) Campanar",
+    "direccion": "Aparcamiento, Aparcamiento, Avinguda de Campanar, 66, Campanar, 46035 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963966223",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Vithas Valencia 9 de Octubre",
+    "direccion": "C/ de la Vall de la Ballestera, 59, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963179100",
+    "web": "https://vithas.es/centro/vithas-hospital-valencia-9-de-octubre/",
+    "emails": "Atencionalpaciente90@vithas.es, comunicacion@vithas.es"
+  },
+  {
+    "nombre": "Centro de Salud Campanar",
+    "direccion": "Carrer de Vicente Ríos Enrique, 1, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963175300",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Urgencias Espai Sanitario Campanar-Ernest Lluch",
+    "direccion": "Avinguda de Campanar, 21, Campanar, 46009 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963966223",
+    "web": "https://lafe.san.gva.es/ca/centros-de-salud-y-consultorios-complementarios",
+    "emails": "aadep07_saip@gva.es, atolsa@gva.es, azucena@gva.es, campanar2_lafe@gva.es, campanar@gva.es, cecalboraya_saip@gva.es, cs_benicalap@gva.es, cs_bilbao@gva.es, cs_trinitat@gva.es, docencia_lafe@gva.es, docenciaenfermera_lafe@gva.es, escuelaenf_inf@gva.es, hlafe_saip@gva.es, salvador_allende@gva.es, simulacion_dslafe@gva.es, simulacionlafe@gmail.com"
+  },
+  {
+    "nombre": "Clínica Vira",
+    "direccion": "Carrer de Teresa de Cofrents, 7, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "633955716",
+    "web": "http://clinicavira.com/",
+    "emails": "clinicavira@gmail.com, raquelel@hotmail.com"
+  },
+  {
+    "nombre": "IVRE+ en Ascires",
+    "direccion": "Avinguda de Campanar, 116, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963205085",
+    "web": "http://ivreplus.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Campanar II",
+    "direccion": "Avinguda de Campanar, Campanar, 46009 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963966200",
+    "web": "https://www.gva.es/va/inicio/atencion_ciudadano/buscadores/departamentos/detalle_departamentos?id_dept=28509",
+    "emails": ""
+  },
+  {
+    "nombre": "Instituto Valenciano de Infertilidad",
+    "direccion": "Carrer d'Enric Valor i Vives Escriptor, Campanar, 46035 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "900847300",
+    "web": "https://ivi.es/clinicas/valencia/?utm_source=google-mb&utm_medium=organic&utm_campaign=clinica-valencia",
+    "emails": "DPO@ivirma.com, RRHH@ivirma.com, gyn.careers@ivirma.com, lopd@ivirma.com"
+  },
+  {
+    "nombre": "Clínica Aston",
+    "direccion": "Av. dels Tamarindes, 21, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "666594315",
+    "web": "http://www.clinicaaston.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Fundación de Oftalmología Médica de la Comunitat Valenciana FOM",
+    "direccion": "Av. Pío Baroja, 12, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "962787620",
+    "web": "https://www.fom.es/",
+    "emails": "FOM@FOM.ES, fom@fom.es"
+  },
+  {
+    "nombre": "IVO. Instituto Valenciano de Oncología",
+    "direccion": "Carrer del Professor Beltrán Báguena, 8, Campanar, 46009 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "961114000",
+    "web": "https://www.ivo.es/",
+    "emails": "informacion@fivo.org, ivoalcoy@fivo.org, n@fivo.org"
+  },
+  {
+    "nombre": "IVI Valencia - Clínica de Reproducción Asistida y Fertilidad",
+    "direccion": "Pl. de la Policia Local, 3, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "651791000",
+    "web": "https://ivi.es/clinicas/valencia/?utm_source=google-mb&utm_medium=organic&utm_campaign=ivi_es_clinica-valencia_conversion",
+    "emails": "DPO@ivirma.com, RRHH@ivirma.com, gyn.careers@ivirma.com, lopd@ivirma.com"
+  },
+  {
+    "nombre": "Dr. Miguel Orozco Fuentes",
+    "direccion": "consulta 40, C/ de la Vall de la Ballestera, 59, 2º piso, Campanar, 46035 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963023499",
+    "web": "https://www.topdoctors.es/doctor/miguel-orozco-fuentes",
+    "emails": ""
+  },
+  {
+    "nombre": "The Test - Clínica de Salud Masculina",
+    "direccion": "Carrer de Vicente Ríos Enrique, 7, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "961169850",
+    "web": "https://clinicasthetest.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "ECODADYS Valencia. Especialistas en ecografias 5D",
+    "direccion": "Av. del General Avilés, 50, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "963255521",
+    "web": "https://www.ecodadys4d.es/centros/ecodadys-valencia/",
+    "emails": "info@ecodadys4d.es"
+  },
+  {
+    "nombre": "Equipo Juana Crespo - Clínica de Reproducción Asistida y Fertilidad",
+    "direccion": "Av. del General Avilés, 90, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "961042557",
+    "web": "https://www.juanacrespo.com/",
+    "emails": "info@juanacrespo.com"
+  },
+  {
+    "nombre": "IVI Dona - Donar óvulos Valencia",
+    "direccion": "Carrer de Guadassuar, 1, Campanar, 46015 València, Valencia",
+    "zona": "Campanar",
+    "telefono": "900844000",
+    "web": "https://www.ividona.es/donar-ovulos/valencia/?utm_source=google-mb&utm_medium=organic&utm_campaign=ividona_es_valencia_conversion",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital IMED Colón",
+    "direccion": "Carrer d'Isabel la Catòlica, 12, L'Eixample, 46004 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963003004",
+    "web": "https://www.imedhospitales.com/es/centros/hospital-imed-colon",
+    "emails": ""
+  },
+  {
+    "nombre": "Policlínico Valencia",
+    "direccion": "12 bis, Pg. de l'Albereda, El Llano del Real, 46010 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963394010",
+    "web": "https://www.policlinicovalencia.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Magnasalud",
+    "direccion": "Carrer de Sant Vicent Màrtir, 52, Ciutat Vella, 46002 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "962067047",
+    "web": "https://clinicamagnasalud.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "My Medica",
+    "direccion": "Pl. de l'Ajuntament, 19, 1C, Ciutat Vella, 46002 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "961355879",
+    "web": "https://mymedicavalencia.com/",
+    "emails": "admin@mymedicavalencia.com"
+  },
+  {
+    "nombre": "Clínica San Martín Valencia",
+    "direccion": "C/ del Gral. San Martín, 7, L'Eixample, 46004 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963220581",
+    "web": "https://www.policlinicasanmartin.es/",
+    "emails": "recepcion@policlinicasanmartin.es"
+  },
+  {
+    "nombre": "Clínica Premium Medical Valencia",
+    "direccion": "C. del Palleter, 4, Planta 1, Pta 2, Extramurs, Extramurs, 46008 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "960550455",
+    "web": "https://premiummedical.es/",
+    "emails": "info@premiummedical.es"
+  },
+  {
+    "nombre": "Clínica médica Valencia | Medicality",
+    "direccion": "C. del Pintor Sorolla, 19, 1° planta, Ciutat Vella, 46002 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "962324155",
+    "web": "https://www.medicality.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro Médico Quirónsalud Mercado de Colón",
+    "direccion": "C/ de Ciril Amorós, 62, L'Eixample, 46004 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "961693040",
+    "web": "https://www.quironsalud.es/valencia/es/centro-medico-quironsalud-mercado-colon",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica IVEMA",
+    "direccion": "Carrer del Comte de Salvatierra, 34, Piso 1 puerta 3, Ensanche, 46004 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "961141117",
+    "web": "https://clinicaivema.com/",
+    "emails": "info@clinicaivema.com"
+  },
+  {
+    "nombre": "Clininav",
+    "direccion": "Av. de l'Oest, 46, Ciutat Vella, 46001 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963519745",
+    "web": "http://www.clininav.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Ciutat Vella",
+    "direccion": "C. del Hospital, 18, 1º A, Ciutat Vella, 46001 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "686663486",
+    "web": "https://clinicaciutatvella.com/",
+    "emails": "dpo@abogadosdelasartes.es, dpo@clinicaciutatvella.com, info@clinicaciutatvella.com"
+  },
+  {
+    "nombre": "Centro de Salud Guillem de Castro",
+    "direccion": "C/ de Guillem de Castro, 149, Extramurs, 46008 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963157000",
+    "web": "https://chguv.san.gva.es/servicios-salud/centros/cs-guillem-de-castro",
+    "emails": ""
+  },
+  {
+    "nombre": "Oficinas Ascires Grupo Biomédico",
+    "direccion": "Carrer de Colón, 1, 5ª Planta, Ciutat Vella, 46004 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963464101",
+    "web": "https://www.ascires.com/",
+    "emails": "dpo@ascires.com, info@ascires.com"
+  },
+  {
+    "nombre": "VARIcentro Valencia",
+    "direccion": "Av. de l'Oest, 25, Ciutat Vella, 46001 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "912778899",
+    "web": "https://varicentro.com/clinicas/valencia/",
+    "emails": "dpd@varicentro.com, info@varicentro.com"
+  },
+  {
+    "nombre": "Pere Bonfill salud mental",
+    "direccion": "Carrer de Pere Bonfill, 10, Extramurs, 46008 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "961923200",
+    "web": "https://www.valencia.es/ayuntamiento/infociudad_accesible.nsf/vDocumentosWebListado/8AF59CD6F8EAE4D4C12579510049907B?OpenDocument&lang=1&nivel=9&bdOrigen=&idApoyo=irAutobus=q",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica INUVA",
+    "direccion": "Av. del Regne de València, 6, L'Eixample, 46005 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "960640078",
+    "web": "https://inuva.es/",
+    "emails": "clinica@inuva.es"
+  },
+  {
+    "nombre": "Boston Medical: Clínica Salud Sexual Masculina Valencia",
+    "direccion": "Gran Via del Marqués del Túria, 49, Planta 8, Puerta 14, Ensanche, 46005 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "910780793",
+    "web": "https://bostonmedical.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Revisalud Valencia - Laboratorio de análisis y consultas médicas",
+    "direccion": "C/ de Ribera, 14, 1, 2, Ciutat Vella, 46002 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963517102",
+    "web": "http://analisisclinicosrevisalud.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Dr. Salvador Miralles Soria",
+    "direccion": "Pl. de l'Ajuntament, 19, 1ºC, Ciutat Vella, 46002 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "960252129",
+    "web": "https://www.topdoctors.es/doctor/salvador-miralles-soria",
+    "emails": ""
+  },
+  {
+    "nombre": "Valenclinic",
+    "direccion": "Gran Via del Marqués del Túria, 11, L'Eixample, 46005 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "962066309",
+    "web": "http://valenclinic.es/",
+    "emails": "manos962066309recepcion@valenclinic.es, recepcion@valenclinic.es"
+  },
+  {
+    "nombre": "Clínicas UCV",
+    "direccion": "Pl. de la Ciutat de Bruges, 6, Ciutat Vella, 46001 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963920624",
+    "web": "https://www.ucv.es/clinicas-ucv",
+    "emails": "clinicas.universitarias@ucv.es, dpd@ucv.es, secretaria.general@ucv.es"
+  },
+  {
+    "nombre": "IVADE",
+    "direccion": "C/ del Cronista Carreres, 8, Ciutat Vella, 46003 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "963530030",
+    "web": "https://ivade.es/",
+    "emails": "info@ivade.es"
+  },
+  {
+    "nombre": "Ginemujer",
+    "direccion": "C/ de la Pau, 16, puerta 2 , 2º piso, Ciutat Vella, 46003 València, Valencia",
+    "zona": "Ciutat Vella",
+    "telefono": "633832473",
+    "web": "http://www.clinicaginemujer.com/",
+    "emails": "info@ginemujer.es"
+  },
+  {
+    "nombre": "Clínica Colón",
+    "direccion": "Av. de Jacinto Benavente, 18, Bajo Derecha, Ensanche, 46005 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "660098990",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Los Laureles",
+    "direccion": "Carrer de Salamanca, 38, L'Eixample, 46005 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "602467895",
+    "web": "http://www.clinicaloslaureles.com/",
+    "emails": "INFO@CLINICALOSLAURELES.COM, info@clinicaloslaureles.com"
+  },
+  {
+    "nombre": "Urgencias del Hospital Clínico Universitario",
+    "direccion": "C. de Menéndez y Pelayo, 440, El Llano del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "961973500",
+    "web": "http://clinicomalvarrosa.san.gva.es/",
+    "emails": "unidadcalidad_hcv@gva.es, urgencias_hcv@gva.es"
+  },
+  {
+    "nombre": "Clínica Ribera Mestalla",
+    "direccion": "Carrer de Misser Mascó, 42, El Pla del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "960919172",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Rehabilitación Médica Paseo al Mar",
+    "direccion": "Carrer de Xile, 17, 19 Bajos, El Llano del Real, 46021 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "963612121",
+    "web": "http://www.rehabilitacionpaseoalmar.es/",
+    "emails": "%20rhb@paseoalmar.es, rhb@paseoalmar.es"
+  },
+  {
+    "nombre": "Hospital Quirónsalud Valencia: Cardiología",
+    "direccion": "Av. de Blasco Ibáñez, 14, El Pla del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "963690600",
+    "web": "https://www.quironsalud.es/valencia/es/cartera-servicios",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica NYR. Neurociencias y Rehabilitación - Mestalla",
+    "direccion": "C/ de Finlàndia, 15, El Pla del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "963523832",
+    "web": "http://clinicanyr.com/",
+    "emails": "info@clinicanyr.com"
+  },
+  {
+    "nombre": "Servicio de Rehabilitacion del Hospital Clinico Universitario de Valencia",
+    "direccion": "Carrer del Dr. Gómez Ferrer, 2, El Pla del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "961973500",
+    "web": "https://clinicomalvarrosa.san.gva.es/es/",
+    "emails": "unidadcalidad_hcv@gva.es, urgencias_hcv@gva.es"
+  },
+  {
+    "nombre": "Centro de Salud Salvador Pau",
+    "direccion": "Carrer de Salvador Pau, 42, Camins al Grau, 46021 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "963108720",
+    "web": "http://clinicomalvarrosa.san.gva.es/centro-de-salud-salvador-pau",
+    "emails": "paci_cssalvadorpau@gva.es, unidadcalidad_hcv@gva.es, urgencias_hcv@gva.es"
+  },
+  {
+    "nombre": "IMR Valencia",
+    "direccion": "Carrer de les Arts Gràfiques, 5, C/ de les Arts Gràfiques, 16, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "960619002",
+    "web": "https://institutomedicoricart.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb",
+    "emails": "info@institutomedicoricart.com, talento@imricart.com"
+  },
+  {
+    "nombre": "Dr. David Dávila Dorta",
+    "direccion": "Carrer de Misser Mascó, 18, piso 2º puerta 6ª, El Pla del Real, 46010 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "963023323",
+    "web": "https://www.topdoctors.es/doctor/david-davila-dorta",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Caro. Salud y Medicina Avanzada",
+    "direccion": "C/ de Polo y Peyrolón, 6, El Pla del Real, 46021 València, Valencia",
+    "zona": "El Pla del Real",
+    "telefono": "644650801",
+    "web": "https://clinica-caro.com/",
+    "emails": "clinicaendocrinovalencia@gmail.com"
+  },
+  {
+    "nombre": "Hospital Vithas Valencia Consuelo",
+    "direccion": "C/ de Callosa d'En Sarrià, 12, Jesús, 46007 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963177800",
+    "web": "https://vithas.es/centro/vithas-hospital-valencia-consuelo/",
+    "emails": "comunicacion@vithas.es"
+  },
+  {
+    "nombre": "‍ ️ Centro Médico CLINICVALENCIA",
+    "direccion": "C/ de Jesús, 70, Extramurs, 46007 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "960664040",
+    "web": "https://www.clinicvalencia.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Unidad de Lipedema Valencia - Hospital Fontana",
+    "direccion": "Gran Via de les Germanies, 36, L'Eixample, 46004 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "623354024",
+    "web": "https://clinicafontana.com/unidad-lipedema/",
+    "emails": "fontana@clinicafontana.es"
+  },
+  {
+    "nombre": "Centro Sanitario Integrado Juan Llorens",
+    "direccion": "Carrer de Joan Llorenç, 8, Extramurs, 46008 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963131250",
+    "web": "https://chguv.san.gva.es/servicios-salud/csi/csi-juan-llorens",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Yarza",
+    "direccion": "Carrer del Literat Gabriel Miró, 56, Extramurs, 46008 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963262690",
+    "web": "http://www.clinicayarza.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Chiva",
+    "direccion": "Avinguda de Pérez Galdós, 33, Patraix, 46018 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963849541",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "TEKDERMA Instituto Dermatológico Hospital 9 de Octubre",
+    "direccion": "Avenida, C/ de la Vall de la Ballestera, 59, 46015 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963164602",
+    "web": "https://tekderma.com/contacto/",
+    "emails": "protecciondatos@tekderma.com"
+  },
+  {
+    "nombre": "OncoFitCare - Centro Oncológico Integral",
+    "direccion": "C/ de l'Actor Rivelles, 3, bajo, Ciutat Vella, 46001 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "680917891",
+    "web": "https://oncofitcare.com/",
+    "emails": "info@oncofitcare.com"
+  },
+  {
+    "nombre": "Urgencias Hospital Vithas Valencia 9 de octubre",
+    "direccion": "C/ d la, C/ de la Vall de la Ballestera, 59, Campanar, 46015 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963179100",
+    "web": "https://vithas.es/centro/vithas-hospital-valencia-9-de-octubre/#urgencias",
+    "emails": "Atencionalpaciente90@vithas.es, comunicacion@vithas.es"
+  },
+  {
+    "nombre": "Hospital Virgen del Consuelo",
+    "direccion": "C/ de Callosa d'En Sarrià, 15, 8, Jesús, 46007 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Espinosa | Tu Ginecólogo en Valencia",
+    "direccion": "C/ de Callosa d'En Sarrià, 12, Piso 3, Jesús, 46007 València, Valencia",
+    "zona": "Extramurs",
+    "telefono": "963518262",
+    "web": "https://clinicaespinosa.com/",
+    "emails": "info@clinicaespinosa.com"
+  },
+  {
+    "nombre": "Hospital Ascires",
+    "direccion": "Av. de les Tres Creus, 102, Patraix, 46014 València, Valencia",
+    "zona": "Jesús",
+    "telefono": "963873050",
+    "web": "https://www.ascires.com/hospital/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Pare Jofré",
+    "direccion": "C/ del Beat Nicolau Factor, 1, Patraix, 46007 València, Valencia",
+    "zona": "Jesús",
+    "telefono": "961926460",
+    "web": "https://doctorpeset.san.gva.es/es/cs-padre-jofre",
+    "emails": "calidad_peset@gva.es, cemonteolivete_saip@gva.es, centsalpadrejofre@gva.es, comdocencia_peset@gva.es, docencia_peset@gva.es, hdrpeset_saip@gva.es, peset_docencia_grado_med@gva.es, prensa_peset@gva.es"
+  },
+  {
+    "nombre": "Clínica de Aborto en Valencia | Mediterránea Médica",
+    "direccion": "Carrer de Salvador Guinot, 14, Jesús, 46017 València, Valencia",
+    "zona": "Jesús",
+    "telefono": "963586020",
+    "web": "https://www.mediterraneamedica.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Bas",
+    "direccion": "Carrer de Joaquín Costa, 42, L'Eixample, 46005 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963749855",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Dra. Rosa Fornes Vivas",
+    "direccion": "Carrer del Comte de Salvatierra, 34, 1º 3ª, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963023520",
+    "web": "https://www.topdoctors.es/doctor/rosa-fornes-vivas",
+    "emails": ""
+  },
+  {
+    "nombre": "Policlínica Cirilo Amorós",
+    "direccion": "C/ de Ciril Amorós, 41, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963511900",
+    "web": "http://policlinicaciriloamoros.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Indolor - Tratamiento del dolor",
+    "direccion": "Gran Via de les Germanies, 6, L'Eixample, 46006 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963228222",
+    "web": "http://www.clinicaindolor.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Eurofins Análisis Clínicos Marqués del Turia",
+    "direccion": "Gran Via del Marqués del Túria, 67, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "961644266",
+    "web": "http://www.eurofinsanalisisclinicos.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Utopía Clinique Valencia | MBST Fisioterapia y Tecnología Regenerativa",
+    "direccion": "Carrer de Félix Pizcueta, 21, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "630910078",
+    "web": "https://www.utopiaclinique.com/valencia/",
+    "emails": "gandia@utopiaclinique.com, info@utopiaclinique.com, madrid@utopiaclinique.com, rrhh@utopiaclinique.com, valencia@utopiaclinique.com"
+  },
+  {
+    "nombre": "Dr. Francisco Sánchez Ballester",
+    "direccion": "Carrer del Comte de Salvatierra, 34, 1º 3ª, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963023520",
+    "web": "https://www.topdoctors.es/doctor/francisco-sanchez-ballester",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Oftalvist",
+    "direccion": "C/ de Russafa, 19, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963513304",
+    "web": "https://www.oftalvist.es/clinicas/oftalvist-valencia",
+    "emails": "DPO@grupoasisa.com"
+  },
+  {
+    "nombre": "Clínicas CRES Valencia",
+    "direccion": "C/ de Ciril Amorós, 34, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963516199",
+    "web": "http://www.clinicascres.com/?utm_source=gmb&utm_medium=organic&utm_campaign=gmb_valencia",
+    "emails": "madrid@clinicascres.com, palma@clinicascres.com, valencia@clinicascres.com, zaragoza@clinicascres.com"
+  },
+  {
+    "nombre": "Clínica Oftalmológica Castro",
+    "direccion": "C.d'Hernán Cortés, 26, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963852520",
+    "web": "https://www.clinicacastro.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "Sociedad Española de Senología y Patología Mamaria",
+    "direccion": "GV, Gran Via del Marqués del Túria, 65, 3º 11, Ensanche, 46005 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963618552",
+    "web": "http://www.sespm.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Dr. Jaime Marco Algarra",
+    "direccion": "Carrer d'Isabel la Catòlica, 7, 1º, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963023459",
+    "web": "https://www.topdoctors.es/doctor/jaime-marco-algarra",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Dr.Ricardo Yaya Huamán",
+    "direccion": "C/ de Sorní, 23 Principal, 1-Puerta 3, Ensanche, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963511865",
+    "web": "http://www.neurologo.info/",
+    "emails": ""
+  },
+  {
+    "nombre": "Dra. Montserrat León Fábregas",
+    "direccion": "C/ de Ciril Amorós, 80, 3º, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "935240857",
+    "web": "https://www.topdoctors.es/doctor/montserrat-leon-fabregas",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Ginecológica Doctor Fernando Gil",
+    "direccion": "Gran Via del Marqués del Túria, 40, puerta 1, L'Eixample, 46005 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963345048",
+    "web": "https://website.dricloud.net/Dricloud_fernando_20383821/Home",
+    "emails": "fgilraga@doctorfernandogil.com"
+  },
+  {
+    "nombre": "Clínica Fisioquiros",
+    "direccion": "C/ del Pintor Salvador Abril, 33, L'Eixample, 46005 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963950619",
+    "web": "http://www.clinicasfisioquiros.com/",
+    "emails": ""
+  },
+  {
+    "nombre": "José Luis López Prats Dasí",
+    "direccion": "C/ de Ciril Amorós, 33, 2º; 3ª, Ensanche, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963941890",
+    "web": "",
+    "emails": ""
+  },
+  {
+    "nombre": "Clínica Dermatológica Hernández",
+    "direccion": "Gran Via del Marqués del Túria, 68 (3º, Eixample, 46005 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "963737984",
+    "web": "http://www.clinicadermatologicahernandez.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Dr. Alexander Bunge, Otorrino",
+    "direccion": "C/ de Ciril Amorós, 62, L'Eixample, 46004 València, Valencia",
+    "zona": "L'Eixample",
+    "telefono": "900301013",
+    "web": "https://www.quironsalud.com/valencia/en/medical-team/alexander-manuel-bunge",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Trinidad",
+    "direccion": "Carrer de la Flora, 7, La Saïdia, 46010 València, Valencia",
+    "zona": "La Saïdia",
+    "telefono": "962825700",
+    "web": "http://www.lafe.san.gva.es/ca/centros-de-salud-y-consultorios-complementarios",
+    "emails": ""
+  },
+  {
+    "nombre": "clínica calle Sagunto 99.",
+    "direccion": "C/ de Sagunt, 105, Bajo, La Saïdia, 46009 València, Valencia",
+    "zona": "La Saïdia",
+    "telefono": "963485931",
+    "web": "https://www.clinicasagunto99.es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Centro de Salud Salvador Allende",
+    "direccion": "C/ del Comte de Lumiares, 3, Rascanya, 46019 València, Valencia",
+    "zona": "La Saïdia",
+    "telefono": "961925050",
+    "web": "http://www.san.gva.es/",
+    "emails": "participa_normativa_centros@gva.es"
+  },
+  {
+    "nombre": "Hospital Universitario Doctor Peset",
+    "direccion": "Av. de Gaspar Aguilar, 90, Patraix, 46017 València, Valencia",
+    "zona": "Patraix",
+    "telefono": "963188700",
+    "web": "https://doctorpeset.san.gva.es/es/",
+    "emails": "calidad_peset@gva.es, cemonteolivete_saip@gva.es, comdocencia_peset@gva.es, docencia_peset@gva.es, hdrpeset_saip@gva.es, peset_docencia_grado_med@gva.es, prensa_peset@gva.es"
+  },
+  {
+    "nombre": "Cs – Resonancia Magnetica Abierta-PROMO",
+    "direccion": "Carrer del Pintor Pasqual Capuz, 1, Patraix, 46018 València, Valencia",
+    "zona": "Patraix",
+    "telefono": "606087771",
+    "web": "http://www.clinicacorposalud.es/",
+    "emails": "info@clinicacorposalud.es"
+  },
+  {
+    "nombre": "CS Tres Forques",
+    "direccion": "C/ de les Tres Forques, 98, L'Olivereta, 46018 València, Valencia",
+    "zona": "Patraix",
+    "telefono": "962936670",
+    "web": "https://chguv.san.gva.es/servicios-salud/centros/centro-de-tres-forques",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Padre Jofré",
+    "direccion": "Carrer de Sant Llàtzer, S/N, Patraix, 46017 València, Valencia",
+    "zona": "Patraix",
+    "telefono": "961925200",
+    "web": "https://hparejofre.san.gva.es/es/",
+    "emails": ""
+  },
+  {
+    "nombre": "Hospital Universitario Doctor Peset Urgencias",
+    "direccion": "Unnamed Road,46017, Av. de Gaspar Aguilar, 90, Patraix, 46017 València, Valencia",
+    "zona": "Patraix",
+    "telefono": "",
+    "web": "",
+    "emails": ""
+  }
+]

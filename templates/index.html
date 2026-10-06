@@ -3,22 +3,53 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Recolector de inmobiliarias · Google Maps</title>
+    <title>Recolectores · Google Maps</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="min-h-screen bg-slate-100 text-slate-800">
     <main class="mx-auto max-w-5xl space-y-6 px-4 py-10">
       <header class="space-y-1">
         <h1 class="text-2xl font-bold text-slate-900">
-          Recolector de inmobiliarias · Google Maps
+          Recolectores · Google Maps
         </h1>
         <p class="text-sm text-slate-500">
-          Una zona por línea. El servidor buscará «inmobiliarias en &lt;zona&gt;
-          valencia», extraerá los datos y eliminará duplicados antes de generar
-          el Excel.
+          Selecciona el tipo de empresa que quieres localizar.
         </p>
       </header>
 
+      <nav
+        class="flex flex-wrap gap-2 border-b border-slate-200"
+        aria-label="Tipos de búsqueda"
+      >
+        <button
+          id="tab-inmobiliarias"
+          type="button"
+          class="rounded-t-lg border-b-2 border-blue-600 px-4 py-3 text-sm font-semibold text-blue-700"
+          aria-selected="true"
+          role="tab"
+          aria-controls="panel-inmobiliarias"
+        >
+          Inmobiliarias
+        </button>
+        <button
+          id="tab-sanidad"
+          type="button"
+          class="rounded-t-lg border-b-2 border-transparent px-4 py-3 text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
+          aria-selected="false"
+          role="tab"
+          aria-controls="panel-sanidad"
+        >
+          Empresas de sanidad
+        </button>
+      </nav>
+
+      <div id="panel-inmobiliarias" role="tabpanel" aria-labelledby="tab-inmobiliarias">
+        <div class="space-y-6">
+      <p class="text-sm text-slate-500">
+        Una zona por línea. El servidor buscará «inmobiliarias en &lt;zona&gt;
+        valencia», extraerá los datos y eliminará duplicados antes de generar
+        el Excel.
+      </p>
       <!-- Paso 1: listado de zonas + botón -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <label
@@ -267,6 +298,214 @@ Loriguilla</textarea
           </table>
         </div>
       </section>
+
+        </div>
+      </div>
+
+      <section
+        id="panel-sanidad"
+        class="hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200"
+        role="tabpanel"
+        aria-labelledby="tab-sanidad"
+        aria-hidden="true"
+      >
+        <div class="mx-auto max-w-2xl text-center">
+          <div
+            class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl"
+          >
+            🏥
+          </div>
+          <h2 class="text-xl font-semibold text-slate-900">
+            Empresas de sanidad
+          </h2>
+          <p class="mt-2 text-sm leading-6 text-slate-500">
+            Selecciona el tipo de empresa al que podría optar una auxiliar de
+            enfermería (TCAE). Las reglas de búsqueda se añadirán en el
+            siguiente paso.
+          </p>
+
+          <div class="mt-8 text-left">
+            <div class="mb-3 flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white"
+              >
+                1
+              </span>
+              <div>
+                <h3 class="font-semibold text-slate-900">
+                  Elige un sector
+                </h3>
+                <p class="text-xs text-slate-500">
+                  Define el tipo de empresa que quieres buscar.
+                </p>
+              </div>
+            </div>
+            <label
+              for="sector-sanidad"
+              class="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Sector empresarial
+            </label>
+            <select
+              id="sector-sanidad"
+              multiple
+              size="18"
+              aria-multiselectable="true"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            >
+              <option value="" disabled>Selecciona uno o varios sectores</option>
+              <option value="todos">Todos los sectores</option>
+              <option value="hospitales-clinicas">
+                Hospitales y clínicas privadas
+              </option>
+              <option value="centros-medicos">
+                Centros médicos y consultas especializadas
+              </option>
+              <option value="clinicas-dentales">Clínicas dentales</option>
+              <option value="clinicas-estetica">
+                Clínicas de estética y medicina estética
+              </option>
+              <option value="residencias">
+                Residencias y centros de mayores
+              </option>
+              <option value="centros-dia">
+                Centros de día y atención a la dependencia
+              </option>
+              <option value="ayuda-domicilio">
+                Ayuda a domicilio y atención sociosanitaria
+              </option>
+              <option value="rehabilitacion">
+                Centros de rehabilitación y fisioterapia
+              </option>
+              <option value="salud-mental">
+                Centros de salud mental y adicciones
+              </option>
+              <option value="reproduccion">
+                Clínicas de reproducción asistida y salud sexual
+              </option>
+              <option value="oftalmologia">Clínicas oftalmológicas</option>
+              <option value="podologia">Clínicas de podología</option>
+              <option value="transporte-sanitario">Transporte sanitario</option>
+              <option value="prevencion">
+                Servicios de prevención y salud laboral
+              </option>
+              <option value="mutuas">
+                Mutuas y compañías de seguros de salud
+              </option>
+              <option value="laboratorios">
+                Laboratorios y centros de diagnóstico
+              </option>
+            </select>
+            <p class="mt-2 text-xs text-slate-500">
+              Esta selección quedará conectada más adelante con las búsquedas
+              y la recopilación de emails.
+            </p>
+          </div>
+
+          <div class="mt-6 text-left">
+            <div class="mb-3 flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-300 text-sm font-bold text-slate-600"
+                id="paso-zona-numero"
+              >
+                2
+              </span>
+              <div>
+                <h3 class="font-semibold text-slate-900">
+                  Elige la zona
+                </h3>
+                <p class="text-xs text-slate-500">
+                  Se habilita después de seleccionar el sector.
+                </p>
+              </div>
+            </div>
+            <label
+              for="zona-sanidad"
+              class="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Barrio o localidad
+            </label>
+            <select
+              id="zona-sanidad"
+              disabled
+              multiple
+              size="32"
+              aria-multiselectable="true"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:opacity-70 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            >
+              <option value="" disabled>Selecciona una o varias zonas</option>
+              <option value="todas">Todas las zonas céntricas</option>
+              <optgroup label="Barrios de València">
+                <option value="algirós">Algirós</option>
+                <option value="beniferri">Beniferri</option>
+                <option value="benimaclet">Benimaclet</option>
+                <option value="benimamet">Benimàmet</option>
+                <option value="camins-al-grau">Camins al Grau</option>
+                <option value="campanar">Campanar</option>
+                <option value="ciutat-vella">Ciutat Vella</option>
+                <option value="pla-del-real">El Pla del Real</option>
+                <option value="extramurs">Extramurs</option>
+                <option value="jesus">Jesús</option>
+                <option value="l-eixample">L'Eixample</option>
+                <option value="la-saïdia">La Saïdia</option>
+                <option value="patraix">Patraix</option>
+                <option value="poblats-maritims">Poblats Marítims</option>
+                <option value="quatre-carreres">Quatre Carreres</option>
+              </optgroup>
+              <optgroup label="Localidades próximas">
+                <option value="alacuas">Alaquàs</option>
+                <option value="alboraia">Alboraia</option>
+                <option value="aldaia">Aldaia</option>
+                <option value="barrio-del-cristo">Barrio del Cristo</option>
+                <option value="betera">Bétera</option>
+                <option value="burjassot">Burjassot</option>
+                <option value="godella">Godella</option>
+                <option value="manises">Manises</option>
+                <option value="moncada">Moncada</option>
+                <option value="mislata">Mislata</option>
+                <option value="paterna">Paterna</option>
+                <option value="quart-de-poblet">Quart de Poblet</option>
+                <option value="tavernes-blanques">Tavernes Blanques</option>
+                <option value="torrent">Torrent</option>
+                <option value="xirivella">Xirivella</option>
+              </optgroup>
+            </select>
+            <p class="mt-2 text-xs text-slate-500">
+              Ámbito inicial: València ciudad y localidades próximas a la Plaza
+              de Toros, aproximadamente hasta 5 km a la redonda.
+            </p>
+          </div>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              id="btn-scrape-sanidad"
+              type="button"
+              disabled
+              class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 font-semibold text-white shadow transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span id="spin-sanidad" class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+              <span id="btn-sanidad-label">Buscar empresas y emails</span>
+            </button>
+            <a id="btn-download-sanidad" href="/api/health/download" class="hidden rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white shadow">
+              ⬇️ Descargar Excel
+            </a>
+          </div>
+          <p id="estado-sanidad" class="mt-4 text-sm text-slate-600"></p>
+          <section id="panel-log-sanidad" class="mt-4 hidden overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-800 text-left">
+            <div class="border-b border-slate-800 bg-slate-900 px-4 py-2 font-mono text-xs text-slate-300">consola · sanidad <span id="log-latido-sanidad" class="hidden text-green-400">●</span></div>
+            <div id="log-salida-sanidad" class="h-64 overflow-auto bg-[#0b1120] px-4 py-3 font-mono text-xs leading-relaxed text-slate-300"></div>
+          </section>
+          <section id="panel-preview-sanidad" class="mt-4 hidden text-left">
+            <div class="flex items-baseline justify-between"><h3 class="font-semibold text-slate-900">Resultados sanitarios</h3><span id="preview-total-sanidad" class="text-sm text-slate-500"></span></div>
+            <div class="mt-2 max-h-96 overflow-auto rounded-lg bg-white ring-1 ring-slate-200">
+              <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="sticky top-0 bg-slate-50 text-left text-xs uppercase text-slate-500"><tr><th class="px-3 py-2">Nombre</th><th class="px-3 py-2">Email</th></tr></thead>
+                <tbody id="preview-cuerpo-sanidad" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
     </main>
 
     <script>
@@ -295,6 +534,25 @@ Loriguilla</textarea
       const logContador = $("log-contador");
       const logLatido = $("log-latido");
       const logAutoscroll = $("log-autoscroll");
+      const tabInmobiliarias = $("tab-inmobiliarias");
+      const tabSanidad = $("tab-sanidad");
+      const panelInmobiliarias = $("panel-inmobiliarias");
+      const panelSanidad = $("panel-sanidad");
+      const sectorSanidad = $("sector-sanidad");
+      const zonaSanidad = $("zona-sanidad");
+      const pasoZonaNumero = $("paso-zona-numero");
+      const btnScrapeSanidad = $("btn-scrape-sanidad");
+      const spinSanidad = $("spin-sanidad");
+      const btnSanidadLabel = $("btn-sanidad-label");
+      const estadoSanidad = $("estado-sanidad");
+      const zonaSanidadLog = $("log-salida-sanidad");
+      const panelLogSanidad = $("panel-log-sanidad");
+      const panelPreviewSanidad = $("panel-preview-sanidad");
+      const previewTotalSanidad = $("preview-total-sanidad");
+      const previewCuerpoSanidad = $("preview-cuerpo-sanidad");
+      const btnDownloadSanidad = $("btn-download-sanidad");
+      let logSanidadDesde = 0;
+      let timerSanidadLog = null;
 
       const COLORES_LOG = {
         info: "text-slate-300",
@@ -309,6 +567,146 @@ Loriguilla</textarea
       let lineasLog = 0;
       let logPidiendo = false;
       let adjunto = false; // true = estamos mirando una ejecución ya en marcha
+
+      function activarTab(tabActivo) {
+        const esSanidad = tabActivo === tabSanidad;
+        const tabSeleccionada = esSanidad ? tabSanidad : tabInmobiliarias;
+        const tabInactiva = esSanidad ? tabInmobiliarias : tabSanidad;
+        const panelActivo = esSanidad ? panelSanidad : panelInmobiliarias;
+        const panelInactivo = esSanidad
+          ? panelInmobiliarias
+          : panelSanidad;
+
+        tabSeleccionada.classList.add("border-blue-600", "text-blue-700");
+        tabSeleccionada.classList.remove(
+          "border-transparent",
+          "text-slate-500",
+        );
+        tabInactiva.classList.add("border-transparent", "text-slate-500");
+        tabInactiva.classList.remove("border-blue-600", "text-blue-700");
+        tabSeleccionada.setAttribute("aria-selected", "true");
+        tabInactiva.setAttribute("aria-selected", "false");
+        panelActivo.classList.remove("hidden");
+        panelInactivo.classList.add("hidden");
+        panelActivo.setAttribute("aria-hidden", "false");
+        panelInactivo.setAttribute("aria-hidden", "true");
+      }
+
+      tabInmobiliarias.addEventListener("click", () =>
+        activarTab(tabInmobiliarias),
+      );
+      tabSanidad.addEventListener("click", () => activarTab(tabSanidad));
+
+      function valoresSeleccionados(select) {
+        return Array.from(select.selectedOptions)
+          .map((option) => option.value)
+          .filter(Boolean);
+      }
+
+      function actualizarBotonSanidad() {
+        btnScrapeSanidad.disabled =
+          !valoresSeleccionados(sectorSanidad).length ||
+          !valoresSeleccionados(zonaSanidad).length;
+      }
+
+      sectorSanidad.addEventListener("change", () => {
+        const sectorSeleccionado = valoresSeleccionados(sectorSanidad).length > 0;
+        zonaSanidad.disabled = !sectorSeleccionado;
+        zonaSanidad.setAttribute("aria-disabled", String(!sectorSeleccionado));
+        pasoZonaNumero.classList.toggle(
+          "bg-slate-300",
+          !sectorSeleccionado,
+        );
+        pasoZonaNumero.classList.toggle(
+          "text-slate-600",
+          !sectorSeleccionado,
+        );
+        pasoZonaNumero.classList.toggle(
+          "bg-emerald-600",
+          sectorSeleccionado,
+        );
+        pasoZonaNumero.classList.toggle("text-white", sectorSeleccionado);
+        if (!sectorSeleccionado) {
+          Array.from(zonaSanidad.options).forEach((option) => {
+            option.selected = false;
+          });
+        }
+        actualizarBotonSanidad();
+      });
+      zonaSanidad.addEventListener("change", () => {
+        actualizarBotonSanidad();
+      });
+
+      async function cargarSanidadPreview() {
+        const res = await fetch("/api/health/data", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        const filas = data.items.flatMap((item) =>
+          (item.emails || "")
+            .split(",")
+            .map((email) => email.trim())
+            .filter(Boolean)
+            .map((email) => ({ nombre: item.nombre, email })),
+        );
+        previewTotalSanidad.textContent = `${filas.length} emails`;
+        previewCuerpoSanidad.innerHTML = "";
+        filas.slice(0, 500).forEach((item) => {
+          const tr = document.createElement("tr");
+          ["nombre", "email"].forEach((campo) => {
+            const td = document.createElement("td");
+            td.className = "max-w-xs truncate px-3 py-2 align-top text-slate-600";
+            td.textContent = item[campo] || "—";
+            td.title = item[campo] || "";
+            tr.appendChild(td);
+          });
+          previewCuerpoSanidad.appendChild(tr);
+        });
+        panelPreviewSanidad.classList.remove("hidden");
+        btnDownloadSanidad.classList.toggle("hidden", !data.total);
+      }
+
+      async function refrescarLogSanidad() {
+        const res = await fetch(`/api/log?desde=${logSanidadDesde}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        data.entradas.forEach((entrada) => {
+          const linea = document.createElement("div");
+          linea.className = entrada.nivel === "error" ? "text-red-400" : entrada.nivel === "warning" ? "text-amber-300" : "text-slate-300";
+          linea.textContent = `${entrada.hora}  ${entrada.texto}`;
+          zonaSanidadLog.appendChild(linea);
+        });
+        logSanidadDesde = data.ultimo;
+        zonaSanidadLog.scrollTop = zonaSanidadLog.scrollHeight;
+        const estado = await fetch("/api/estado", { cache: "no-store" });
+        if (estado.ok && !(await estado.json()).en_curso && timerSanidadLog) {
+          clearInterval(timerSanidadLog); timerSanidadLog = null;
+          btnScrapeSanidad.disabled = false; spinSanidad.classList.add("hidden"); btnSanidadLabel.textContent = "Buscar empresas y emails";
+          await cargarSanidadPreview();
+        }
+      }
+
+      btnScrapeSanidad.addEventListener("click", async () => {
+        const sectores = valoresSeleccionados(sectorSanidad);
+        const zonas = valoresSeleccionados(zonaSanidad);
+        if (!sectores.length || !zonas.length) return;
+        btnScrapeSanidad.disabled = true; spinSanidad.classList.remove("hidden"); btnSanidadLabel.textContent = "Buscando…";
+        estadoSanidad.textContent = `Buscando ${sectores.length * zonas.length} combinaciones y rastreando sus webs…`;
+        zonaSanidadLog.innerHTML = ""; panelLogSanidad.classList.remove("hidden"); panelPreviewSanidad.classList.add("hidden");
+        logSanidadDesde = 0;
+        if (timerSanidadLog) clearInterval(timerSanidadLog);
+        timerSanidadLog = setInterval(refrescarLogSanidad, 700);
+        try {
+          const res = await fetch("/api/health/scrape", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({sector: sectores, zona: zonas}) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.detail || `Error ${res.status}`);
+          estadoSanidad.textContent = `✅ ${data.total} empresas encontradas · ${data.segundos} s`;
+          await cargarSanidadPreview();
+        } catch (error) {
+          estadoSanidad.textContent = `❌ ${error.message}`;
+          if (timerSanidadLog) { clearInterval(timerSanidadLog); timerSanidadLog = null; }
+          btnScrapeSanidad.disabled = false; spinSanidad.classList.add("hidden"); btnSanidadLabel.textContent = "Buscar empresas y emails";
+        }
+      });
 
       /* ---------------------------- consola en directo ---------------------------- */
 

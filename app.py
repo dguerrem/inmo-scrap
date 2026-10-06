@@ -33,6 +33,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
@@ -50,6 +51,7 @@ from playwright.sync_api import sync_playwright
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 DATA_FILE = BASE_DIR / "data_temp.json"
+HEALTH_DATA_FILE = BASE_DIR / "sanidad_data_temp.json"
 DESCARTES_FILE = BASE_DIR / "descartados_temp.json"
 ZONAS_FILE = BASE_DIR / "zonas_valencia.json"
 
@@ -85,6 +87,7 @@ COLUMNAS: tuple[tuple[str, str], ...] = (
 )
 
 MAX_CICLOS_SCROLL = 40       # ciclos máximos de scroll dentro del feed, por zona
+MAX_CICLOS_SCROLL_SANIDAD = 8  # sanidad: evita ampliar la búsqueda fuera del ámbito elegido
 ESPERA_SCROLL_MS = 1200      # pausa tras cada scroll (carga dinámica)
 CICLOS_SIN_NOVEDAD = 3       # se corta cuando N ciclos no aportan resultados nuevos
 RECICLAR_PAGINA_CADA = 25    # recrea la pestaña cada N zonas (higiene de memoria)
@@ -338,6 +341,11 @@ class ScrapeRequest(BaseModel):
     zonas: list[str] = Field(default_factory=list)
 
 
+class HealthScrapeRequest(BaseModel):
+    sector: str | list[str] = Field(default_factory=list)
+    zona: str | list[str] = Field(default_factory=list)
+
+
 # --------------------------------------------------------------------------- #
 # Endpoints
 # --------------------------------------------------------------------------- #
@@ -484,6 +492,91 @@ def download() -> StreamingResponse:
     )
 
 
+@app.post("/api/health/scrape")
+def health_scrape(peticion: HealthScrapeRequest) -> dict[str, Any]:
+    """Busca empresas sanitarias y visita sus webs para encontrar emails."""
+    sectores_recibidos = (
+        peticion.sector if isinstance(peticion.sector, list) else [peticion.sector]
+    )
+    zonas_recibidas = peticion.zona if isinstance(peticion.zona, list) else [peticion.zona]
+    sectores = [sector.strip() for sector in sectores_recibidos if sector.strip()]
+    zonas = [zona.strip() for zona in zonas_recibidas if zona.strip()]
+    if not sectores or not zonas:
+        raise HTTPException(status_code=400, detail="Selecciona sector y zona.")
+    if not _candado.acquire(blocking=False):
+        raise HTTPException(status_code=409, detail="Ya hay un scraping en curso.")
+    inicio = time.time()
+    try:
+        with _lock_log:
+            _registro.clear()
+        total_busquedas = len(sectores) * len(zonas)
+        _reiniciar_progreso(total_busquedas)
+        log.info(
+            "═══ Nueva búsqueda sanitaria · %d sectores · %d zonas · %d búsquedas ═══",
+            len(sectores),
+            len(zonas),
+            total_busquedas,
+        )
+        registros = []
+        for sector in sectores:
+            for zona in zonas:
+                log.info("Sanidad · combinación %s en %s", sector, zona)
+                registros.extend(_scrape_sanidad(sector, zona))
+                registros = deduplicar_sanidad(registros)
+                _guardar_sanidad(registros)
+        registros = deduplicar_sanidad(registros)
+        _guardar_sanidad(registros)
+        log.info("═══ Sanidad terminada · %d empresas con email/contacto ═══", len(registros))
+        return {"ok": True, "total": len(registros), "segundos": round(time.time() - inicio, 1)}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        mensaje = f"{type(exc).__name__}: {exc}"
+        log.error("Búsqueda sanitaria abortada · %s", mensaje)
+        raise HTTPException(status_code=500, detail=mensaje) from exc
+    finally:
+        _cerrar_progreso()
+        _candado.release()
+
+
+@app.get("/api/health/data")
+def health_data() -> dict[str, Any]:
+    items = _leer_sanidad()
+    return {"total": len(items), "items": items}
+
+
+@app.get("/api/health/download")
+def health_download() -> StreamingResponse:
+    items = _leer_sanidad()
+    if not items:
+        raise HTTPException(status_code=404, detail="Todavía no hay datos sanitarios.")
+    filas = _filas_sanidad_excel(items)
+    if not filas:
+        raise HTTPException(status_code=404, detail="No hay emails sanitarios válidos.")
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Sanidad"
+    columnas = ("Nombre", "Email")
+    hoja.append(columnas)
+    for fila in filas:
+        hoja.append(fila)
+    for celda in hoja[1]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill("solid", fgColor=AZUL)
+    hoja.freeze_panes = "A2"
+    hoja.auto_filter.ref = hoja.dimensions
+    for columna, ancho in enumerate((40, 45), start=1):
+        hoja.column_dimensions[get_column_letter(columna)].width = ancho
+    buffer = io.BytesIO()
+    libro.save(buffer)
+    buffer.seek(0)
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="sanidad_{datetime.now():%Y%m%d_%H%M}.xlsx"'},
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Scraping (Playwright, sincrónico -> FastAPI lo ejecuta en un hilo aparte)
 # --------------------------------------------------------------------------- #
@@ -555,6 +648,256 @@ def _url_zona(zona: str) -> str:
     """https://www.google.com/maps/search/inmobiliarias+en+<ZONA>+valencia"""
     termino = quote_plus(f"inmobiliarias en {zona} valencia")
     return PLANTILLA_URL.format(termino=termino)
+
+
+def _url_sanidad(sector: str, zona: str) -> str:
+    termino = quote_plus(f"{sector} en {zona} Valencia")
+    return PLANTILLA_URL.format(termino=termino)
+
+
+SECTORES_SANIDAD = {
+    "todos": "empresas de salud",
+    "hospitales-clinicas": "hospitales y clínicas privadas",
+    "centros-medicos": "centros médicos",
+    "clinicas-dentales": "clínicas dentales",
+    "clinicas-estetica": "clínicas de estética",
+    "residencias": "residencias de mayores",
+    "centros-dia": "centros de día",
+    "ayuda-domicilio": "ayuda a domicilio",
+    "rehabilitacion": "centros de rehabilitación y fisioterapia",
+    "salud-mental": "centros de salud mental",
+    "reproduccion": "clínicas de reproducción asistida",
+    "oftalmologia": "clínicas oftalmológicas",
+    "podologia": "clínicas de podología",
+    "transporte-sanitario": "transporte sanitario",
+    "prevencion": "servicios de prevención y salud laboral",
+    "mutuas": "mutuas y seguros de salud",
+    "laboratorios": "laboratorios y centros de diagnóstico",
+}
+
+ZONAS_SANIDAD = {
+    "algirós": "Algirós",
+    "beniferri": "Beniferri",
+    "benimaclet": "Benimaclet",
+    "benimamet": "Benimàmet",
+    "camins-al-grau": "Camins al Grau",
+    "campanar": "Campanar",
+    "ciutat-vella": "Ciutat Vella",
+    "pla-del-real": "El Pla del Real",
+    "extramurs": "Extramurs",
+    "jesus": "Jesús",
+    "l-eixample": "L'Eixample",
+    "la-saïdia": "La Saïdia",
+    "patraix": "Patraix",
+    "poblats-maritims": "Poblats Marítims",
+    "quatre-carreres": "Quatre Carreres",
+    "alacuas": "Alaquàs",
+    "alboraia": "Alboraia",
+    "aldaia": "Aldaia",
+    "barrio-del-cristo": "Barrio del Cristo",
+    "betera": "Bétera",
+    "burjassot": "Burjassot",
+    "godella": "Godella",
+    "manises": "Manises",
+    "moncada": "Moncada",
+    "mislata": "Mislata",
+    "paterna": "Paterna",
+    "quart-de-poblet": "Quart de Poblet",
+    "tavernes-blanques": "Tavernes Blanques",
+    "torrent": "Torrent",
+    "xirivella": "Xirivella",
+}
+
+
+def _scrape_sanidad(sector: str, zona: str) -> list[dict[str, str]]:
+    termino = SECTORES_SANIDAD.get(sector, sector)
+    zona = ZONAS_SANIDAD.get(zona, zona)
+    resultados: list[dict[str, str]] = []
+    with sync_playwright() as pw:
+        navegador = pw.chromium.launch(
+            headless=True, args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
+        )
+        contexto = navegador.new_context(locale="es-ES", viewport={"width": 1440, "height": 900}, user_agent=USER_AGENT)
+        pagina = contexto.new_page()
+        pagina.set_default_timeout(30_000)
+        web_pagina = contexto.new_page()
+        web_pagina.set_default_timeout(15_000)
+        try:
+            log.info("Sanidad · buscando «%s» en «%s»", termino, zona)
+            pagina.goto(_url_sanidad(termino, zona), wait_until="domcontentloaded", timeout=60_000)
+            _aceptar_consentimiento(pagina)
+            pagina.wait_for_timeout(1200)
+            if "/sorry/" in pagina.url:
+                raise RuntimeError("Google ha cortado las peticiones (página /sorry/).")
+            if "/maps/place/" in pagina.url:
+                enlaces = {pagina.url: _texto(pagina.locator("h1").first)}
+            else:
+                pagina.locator(SEL_FEED).wait_for(state="visible", timeout=20_000)
+                enlaces = _recolectar_enlaces(
+                    pagina,
+                    zona,
+                    max_ciclos=MAX_CICLOS_SCROLL_SANIDAD,
+                )
+            _actualizar_progreso(fichas_totales=len(enlaces))
+            log.info("Sanidad · %d negocios encontrados; extrayendo fichas y webs…", len(enlaces))
+            for posicion, (href, nombre) in enumerate(enlaces.items(), start=1):
+                item = {"nombre": nombre, "direccion": "", "zona": zona, "telefono": "", "web": "", "emails": ""}
+                try:
+                    log.info(
+                        "Sanidad · %s · paso 1/2: leyendo ficha de Google Maps…",
+                        nombre or "(sin nombre)",
+                    )
+                    pagina.goto(href, wait_until="domcontentloaded", timeout=45_000)
+                    pagina.wait_for_selector("h1", timeout=15_000)
+                    ficha = _extraer_ficha(pagina)
+                    item.update({campo: ficha.get(campo, "") for campo in ("nombre", "direccion", "telefono", "web")})
+                    if item["web"]:
+                        log.info("Sanidad · %s · paso 2/2: rastreando web…", item["nombre"] or nombre)
+                        item["emails"] = _extraer_emails_web(web_pagina, item["web"])
+                    else:
+                        log.info(
+                            "Sanidad · %s · paso 2/2: sin web, no se puede buscar email",
+                            item["nombre"] or nombre,
+                        )
+                    log.info(
+                        "Sanidad · %s · resultado final: %s",
+                        item["nombre"] or nombre,
+                        item["emails"] or "sin email encontrado",
+                    )
+                except (PlaywrightTimeoutError, RuntimeError) as exc:
+                    log.warning("Sanidad · %s · FALLO: %s", nombre or "(sin nombre)", exc)
+                except Exception as exc:
+                    log.warning("Sanidad · %s · FALLO inesperado: %s", nombre or "(sin nombre)", exc)
+                if item["nombre"]:
+                    resultados.append(item)
+                _actualizar_progreso(fichas_hechas=posicion, acumuladas=len(resultados))
+        except (PlaywrightTimeoutError, RuntimeError) as exc:
+            log.warning(
+                "Sanidad · combinación «%s en %s» omitida · FALLO: %s",
+                termino,
+                zona,
+                exc,
+            )
+        finally:
+            contexto.close()
+            navegador.close()
+    return deduplicar_sanidad(resultados)
+
+
+EMAIL_RE = re.compile(
+    r"(?<![a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-])"
+    r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@"
+    r"(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+"
+    r"[a-zA-Z]{2,63}"
+    r"(?![a-zA-Z0-9.-])"
+)
+EMAIL_DOMINIOS_EXCLUIDOS = {
+    "example.com",
+    "example.net",
+    "example.org",
+    "localhost",
+}
+PAGINAS_CONTACTO = ("contact", "contacto", "about", "nosotros", "aviso", "legal")
+
+
+def _extraer_emails_web(pagina, web: str) -> str:
+    """Visita la portada y hasta tres enlaces internos de contacto del mismo dominio."""
+    parsed = urlparse(web)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        log.warning("Web omitida por URL no válida: %s", web)
+        return ""
+    dominio = parsed.netloc.lower().split(":", 1)[0]
+    urls: list[str] = [web]
+    encontrados: set[str] = set()
+    for indice, url in enumerate(urls):
+        if indice >= 4:
+            break
+        try:
+            pagina.goto(url, wait_until="domcontentloaded", timeout=12_000)
+            contenido = pagina.locator("body").inner_text(timeout=4000) or ""
+            candidatos = set(EMAIL_RE.findall(contenido))
+            for enlace in pagina.locator('a[href^="mailto:"]').all():
+                href = enlace.get_attribute("href", timeout=1500) or ""
+                candidatos.update(EMAIL_RE.findall(href.removeprefix("mailto:")))
+            encontrados.update(
+                email
+                for email in candidatos
+                if email.rsplit("@", 1)[-1].lower() not in EMAIL_DOMINIOS_EXCLUIDOS
+            )
+            if indice == 0:
+                for enlace in pagina.locator("a").all():
+                    href = enlace.get_attribute("href", timeout=1500) or ""
+                    texto = (enlace.inner_text(timeout=1500) or "").lower()
+                    if href.startswith(("mailto:", "http://", "https://")) and (
+                        any(palabra in f"{texto} {href.lower()}" for palabra in PAGINAS_CONTACTO)
+                    ):
+                        destino = href.split("#", 1)[0]
+                        if destino.startswith(("http://", "https://")) and urlparse(destino).netloc.lower().split(":", 1)[0] == dominio:
+                            if destino not in urls:
+                                urls.append(destino)
+                    if len(urls) >= 4:
+                        break
+        except PlaywrightTimeoutError:
+            log.warning("Web · timeout al visitar %s", url)
+        except Exception as exc:
+            log.warning("Web · no se pudo leer %s · %s", url, exc)
+    return ", ".join(sorted(encontrados))
+
+
+def _separar_emails(emails: str) -> list[str]:
+    return [email.strip() for email in emails.split(",") if email.strip()]
+
+
+def _filas_sanidad_excel(items: list[dict[str, str]]) -> list[tuple[str, str]]:
+    filas: list[tuple[str, str]] = []
+    pares_vistos: set[tuple[str, str]] = set()
+    emails_vistos: set[str] = set()
+    nombres_vistos: dict[str, str] = {}
+    for item in items:
+        nombre = item.get("nombre", "").strip()
+        nombre_normalizado = _normalizar_nombre(nombre)
+        if nombre and nombre_normalizado:
+            nombres_vistos.setdefault(nombre_normalizado, nombre)
+        for email in _separar_emails(item.get("emails", "")):
+            email_normalizado = email.casefold()
+            clave = (nombre_normalizado, email_normalizado)
+            if not nombre or not nombre_normalizado or clave in pares_vistos:
+                continue
+            if email_normalizado in emails_vistos:
+                continue
+            pares_vistos.add(clave)
+            emails_vistos.add(email_normalizado)
+            filas.append((nombres_vistos[nombre_normalizado], email))
+    return filas
+
+
+def deduplicar_sanidad(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    unicos: dict[str, dict[str, str]] = {}
+    for item in items:
+        clave = _normalizar_nombre(item.get("nombre", "")) or item.get("web", "").lower()
+        if not clave:
+            continue
+        if clave not in unicos:
+            unicos[clave] = item
+        elif item.get("emails") and not unicos[clave].get("emails"):
+            unicos[clave]["emails"] = item["emails"]
+    return list(unicos.values())
+
+
+def _guardar_sanidad(items: list[dict[str, str]]) -> None:
+    temporal = HEALTH_DATA_FILE.with_suffix(".json.tmp")
+    temporal.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(temporal, HEALTH_DATA_FILE)
+
+
+def _leer_sanidad() -> list[dict[str, str]]:
+    if not HEALTH_DATA_FILE.exists():
+        return []
+    try:
+        datos = json.loads(HEALTH_DATA_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    return datos if isinstance(datos, list) else []
 
 
 def _scrape_zonas(zonas: list[str]) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
@@ -713,7 +1056,12 @@ def _scrape_zona(pagina, zona: str) -> list[dict[str, str]]:
     return items
 
 
-def _recolectar_enlaces(pagina, zona: str) -> dict[str, str]:
+def _recolectar_enlaces(
+    pagina,
+    zona: str,
+    *,
+    max_ciclos: int = MAX_CICLOS_SCROLL,
+) -> dict[str, str]:
     """
     Hace scroll DENTRO del panel de resultados y acumula {href: nombre}.
 
@@ -727,7 +1075,7 @@ def _recolectar_enlaces(pagina, zona: str) -> dict[str, str]:
     sin_novedad = 0
     fuera_de_radio = 0
 
-    for ciclo in range(MAX_CICLOS_SCROLL):
+    for ciclo in range(max_ciclos):
         try:
             for fila in pagina.evaluate(JS_ENLACES):
                 href = (fila.get("href") or "").strip()
